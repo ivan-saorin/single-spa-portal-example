@@ -1,15 +1,17 @@
 import Vue from 'vue'
-import singleSpaVue from 'single-spa-vue';
+import singleSpaVue from './single-spa-vue';
 import App from './App.vue'
+import Vuex from "vuex"
 
 Vue.config.productionTip = false;
 
 const vueLifecycles = singleSpaVue({
     Vue,
+    Vuex,
     appOptions: {
         el: '#app4',
         render: h => h(App)
-}
+    }
 });
 
 export const bootstrap = [

@@ -69,3 +69,6 @@ release
 # git
 git
 git.pub
+
+# yarn lock
+yarn.lock

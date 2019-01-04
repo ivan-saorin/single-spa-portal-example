@@ -2,6 +2,7 @@
   <div id="app4">
     <img src="./assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div>count: {{this.$store.state.count}}</div>
   </div>
 </template>
 
