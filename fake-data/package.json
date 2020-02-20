@@ -1,0 +1,21 @@
+{
+  "name": "fake-data",
+  "version": "1.0.0",
+  "description": "Fake data",
+  "main": "server.js",
+  "scripts": {
+    "generate": "node ./generate.js > ./database.json",
+    "server": "json-server --watch -p 3200 ./database.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "fake",
+    "data"
+  ],
+  "author": "Ivan Saorin",
+  "license": "MIT",
+  "dependencies": {
+    "faker": "^4.1.0",
+    "json-server": "^0.16.0"
+  }
+}
