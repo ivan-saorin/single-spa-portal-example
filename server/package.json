@@ -1,7 +1,7 @@
 {
-  "name": "fake-data",
+  "name": "server",
   "version": "1.0.0",
-  "description": "Fake data",
+  "description": "Data Server",
   "main": "server.js",
   "scripts": {
     "generate": "node ./generate.js > ./database.json",
