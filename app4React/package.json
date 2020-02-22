@@ -1,47 +1,23 @@
 {
-  "name": "react-crud-example",
-  "version": "0.1.0",
   "private": true,
-  "description": "Basic crud react app for managing contacts",
-  "author": "Michael Wanyoike",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:brandiqa/react-crud-example.git"
+  "scripts": {
+    "build": "./node_modules/typescript/bin/tsc -p ./js/ && node ./node_modules/browserify/bin/cmd ./js/app.js -o ./js/bundle.js",
+    "start": "node ./serve.js"
   },
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
-    "@testing-library/user-event": "^7.1.2",
-    "axios": "^0.19.2",
+    "@types/classnames": "^2.2.6",
+    "@types/react": "^16.7.0",
+    "@types/react-dom": "^16.0.11",
     "classnames": "^2.2.6",
-    "fomantic-ui-css": "^2.8.3",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "react-hook-form": "^4.7.1",
-    "react-router-dom": "^5.1.2",
-    "react-scripts": "3.3.0",
-    "semantic-ui-react": "^0.88.2"
+    "director": "^1.2.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "todomvc-app-css": "^2.0.0",
+    "todomvc-common": "^1.0.1"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "devDependencies": {
+    "browserify": "^16.2.3",
+    "node-static": "^0.7.11",
+    "typescript": "^2.9.2"
   }
 }
