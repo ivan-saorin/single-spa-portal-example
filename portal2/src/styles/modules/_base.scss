@@ -13,6 +13,20 @@
   background: $background-color;
 }
 
+html { 
+  overflow: auto; 
+} 
+
+html, 
+body, 
+div, 
+iframe { 
+  margin: 0px; 
+  padding: 0px; 
+  height: 100%; 
+  border: none; 
+} 
+
 header {
   display: flex;
   justify-content: space-between;
@@ -66,6 +80,11 @@ button:hover {
   background-color: rgbs(0,136,169,0.8);
 }
 
+content iframe {
+  width: 100%;
+  height: -webkit-fill-available;
+}
+
 .show {
   display: block;
 }
@@ -73,3 +92,11 @@ button:hover {
 .hide {
   display: none;
 }
+
+content iframe { 
+  display: block; 
+  width: 100%; 
+  border: none; 
+  overflow-y: auto; 
+  overflow-x: hidden; 
+} 

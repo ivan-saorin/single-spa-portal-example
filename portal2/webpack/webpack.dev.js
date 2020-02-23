@@ -61,12 +61,6 @@ module.exports = {
       template: './' + src_Path + '/index.html',
       filename: 'index.html'
     }),
-    new HtmlWebpackPlugin({
-      inject: false,
-      hash: false,
-      template: './' + src_Path + '/navigation.html',
-      filename: 'navigation.html'
-    }),
     new CopyPlugin([
       { from: './' + src_Path + '/assets', to: path.resolve(__dirname, prod_Path) + '/assets' }
     ])

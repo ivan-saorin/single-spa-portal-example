@@ -1,35 +1,26 @@
 # single-spa-portal-example
 The goal of this project is to provide an example of how to build a portal like app which consists of multiple single page applications (SPA's). Each SPA should be self contained with its own build process. It should be individually deployable without the need to deploy the whole application if there are changes to any individual app.
 
-This example is based on [simple-single-spa-webpack-example](https://github.com/joeldenning/simple-single-spa-webpack-example/blob/master/README.md) but will provide further features like:
+This example stretch the idea of micro-frontends for Single Page Application and currently provide the following featutes :
 
 - [x] Isolate SPA's with their own build process
-- [x] Load SPA's on demand with SystemJS
-- [x] Provide a way to communicate between each SPA
+- [x] Load SPA's on demand via iFrame
+- [ ] Provide a way to communicate between each SPA
 - [x] Get assets (like images, fonts, css, etc.) coming from different servers to work
 - [x] Support multiple Angular versions without zone.js conflicts. For details see [Multiple Angular Apps](#multiple-angular-apps)
-- [x] Support Angular AOT Builds
 
 ## How to run this project
 1. Clone this project
-2. Jump into each app folder and do:
+2. Jump into the main folder and do:
    - `npm install`
-   - `npm run watch:portal`
+   - `npm start`
 3. Then start the portal with:
+   - `cd portal2`
    - `npm install`
-   - `npm run watch`
-4. Open up http://localhost:9000 in a web browser.
+   - `npm start`
+4. Open up http://localhost:8080 in a web browser.
 
-## npm tasks
-`watch:portal`: Builds the app as UMD module with singleSPA as middleware to consume the app by the portal. Changes are automatically detected.
-
-`build:portal`: Releases the app as UMD module and outputs all contents to a folder. You can upload the produced file in production to your webserver. **Hint**: The Angular 6 example is being build with AOT. You can use `npm run build:portal -- --env.analyzeBundle` to see that there is no compiler.js inside the bundle.
-
-`watch:standalone`: If you just want to develop the single app without the whole portal, you can use this task. Check the console log to see which port the app is being served from. This task is OPTIONAL! For now this task only exists on the Vue project to serve as an example.
-
-`build:standalone`: As with the `watch:standlone` taks, this builds the app as stand alone version (no portal needed). This task is OPTIONAL! For now this task only exists on the Vue project to serve as an example.
-
-## inter-app-communication
+## inter-app-communication (To be done)
 This topic has been discussed multiple times (i.e. [here](https://github.com/CanopyTax/single-spa/issues/112) or [here](https://github.com/CanopyTax/single-spa/issues/107)). There may be many solutions to solve this problem. In this repository I want you to show a solution that meets the following requirements:
 
 - Each app is a self contained system. No app knows the internal state of another app or their data model. In short, each app is treated as a black box and can be maintained by a different team. 

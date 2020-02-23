@@ -9,6 +9,8 @@ const testMessage: string = 'TypeScript works';
 
 const router = new GrapnelRouter.default({ pushState : true, root : '/'   });
 
+let errorTimeout: number;
+
 function getBasePathEl(): HTMLAnchorElement {
     return <HTMLAnchorElement> document.getElementById('basePath');
 }
@@ -19,11 +21,11 @@ function getBasePath() {
 }
 
 function getLoadingEl() {
-    return document.getElementsByTagName('LOADING')[0];
+    return <HTMLElement>document.getElementsByTagName('LOADING')[0];
 }
 
 function getContentEl() {
-    return document.getElementsByTagName('CONTENT')[0];
+    return <HTMLElement>document.getElementsByTagName('CONTENT')[0];
 }
 
 function start() {
@@ -36,13 +38,20 @@ function start() {
     utils.addClass(contentEl, 'hide');
 }
 
-function load() {
-    let loadingEl = getLoadingEl();    
+function load() {    
+    let loadingEl = getLoadingEl();
+    loadingEl.innerHTML = 'Loading...';
     utils.removeClass(loadingEl, 'hide');
     utils.addClass(loadingEl, 'show');
     let contentEl = getContentEl();
     utils.removeClass(contentEl, 'show');
     utils.addClass(contentEl, 'hide');
+}
+
+function loadedEvt(this: GlobalEventHandlers, ev: Event) : any {
+    loaded();
+    let iframe = <HTMLIFrameElement>ev.target;
+    
 }
 
 function loaded() {
@@ -52,6 +61,17 @@ function loaded() {
     let contentEl = getContentEl();
     utils.removeClass(contentEl, 'hide');
     utils.addClass(contentEl, 'show');
+    clearTimeout(errorTimeout);
+}
+
+function loadingErrorEvt(this: GlobalEventHandlers, ev: Event) : any {
+    loadingError();
+}
+
+function loadingError() {
+    let loadingEl = getLoadingEl();
+    loadingEl.innerHTML = 'Error loading content.';
+    console.error('Error loading content.');
 }
 
 function handleClick(event: any) {
@@ -62,16 +82,33 @@ function handleClick(event: any) {
     // Log the clicked element in the console
     console.log(event.target);
 
-    load();
     let path = utils.removeStart(event.target.href, getBasePath());
     console.log('want to navigate to:', path);
     router.navigate(path);
-    loaded();
 }
 
 function onNavigate(event: any) {
     // GET /foo/bar
     console.log('URL changed to %s', this.path());
+
+    const microFrontendsByRoute: any = {
+        'app1Angular8': 'http://localhost:4001/',
+        'app2Angular9': 'http://localhost:4002/',
+        'app3Vue': 'http://localhost:4003/',
+        'app4React': 'http://localhost:4004/'
+      };
+
+      const iframe = <HTMLIFrameElement>document.getElementById('mfc');
+      iframe.frameBorder='0';
+      iframe.scrolling='no';
+      iframe.marginHeight='0';
+      iframe.marginWidth='0';      
+      iframe.onload = loadedEvt;
+      //iframe.onerror = loadingErrorEvt;
+      errorTimeout = setTimeout(loadingError, 5000);
+      load();
+      iframe.src = microFrontendsByRoute[this.path()];
+
     // => URL changed to /foo/bar
 }
 
