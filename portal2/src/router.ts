@@ -1,3 +1,4 @@
+// https://github.com/s22h/router.ts
 export class Route {
 	public path: string;
 	public callback: CallableFunction;
