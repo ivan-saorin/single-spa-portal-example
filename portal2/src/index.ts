@@ -1,9 +1,21 @@
 import './styles/style.scss';
-import * as utils from "./Utils";
+import * as utils from './Utils';
+import Grapnel from './vendor/grapnel-router.js';
 
 console.log('hello, world');
 
 const testMessage: string = 'TypeScript works';
+
+const router = new Grapnel({ pushState : true, root : '/'  });
+
+function getBasePathEl(): HTMLAnchorElement {
+    return <HTMLAnchorElement> document.getElementById('basePath');
+}
+
+function getBasePath() {
+    let basePathEl = getBasePathEl();
+    return basePathEl ? basePathEl.href : "";
+}
 
 function getLoadingEl() {
     return document.getElementsByTagName('LOADING')[0];
@@ -49,7 +61,10 @@ function handleClick(event: any) {
     // Log the clicked element in the console
     console.log(event.target);
 
-    load();    
+    load();
+    let path = utils.removeStart(event.target.href, getBasePath());
+    console.log('want to navigate to:', path);
+    router.navigate(path);
     loaded();
 }
 
@@ -66,6 +81,11 @@ function init() {
             Array.prototype.filter.call(as, function(a: any){
                 console.log(a.nodeName);
                 // Ensure to register click event lietner only once
+                router.on('navigate', function (event: any) {
+                    // GET /foo/bar
+                    console.log('URL changed to %s', this.path());
+                    // => URL changed to /foo/bar
+                });
                 a.removeEventListener("click", handleClick, false);
                 a.addEventListener('click', handleClick, false);  
             });    
