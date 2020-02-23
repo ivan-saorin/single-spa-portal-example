@@ -1,15 +1,16 @@
 import './styles/style.scss';
 import * as utils from './Utils';
-//import GrapnelRouter from './vendor/GrapnelRouter';
-import GrapnelRouter = require('./vendor/grapnel-router-min.js');
+import { Router, RouterMode } from "./router";
 
 console.log('hello, world');
 
-const testMessage: string = 'TypeScript works';
+const errorTimeoutValue: number = 7000;
 
-const router = new GrapnelRouter.default({ pushState : true, root : '/'   });
+let router = new Router(RouterMode.History);
 
+console.log(router);
 let errorTimeout: number;
+
 
 function getBasePathEl(): HTMLAnchorElement {
     return <HTMLAnchorElement> document.getElementById('basePath');
@@ -87,32 +88,47 @@ function handleClick(event: any) {
     router.navigate(path);
 }
 
-function onNavigate(event: any) {
+function logNavigation(event: any) {
+    console.log('URL changed to %s', router.getCurrentPath());
+}
+
+function handleRoute() {
     // GET /foo/bar
-    console.log('URL changed to %s', this.path());
+    let path = router.getCurrentPath();
+    console.log('URL changed to %s', path);
 
     const microFrontendsByRoute: any = {
-        'app1Angular8': 'http://localhost:4001/',
-        'app2Angular9': 'http://localhost:4002/',
-        'app3Vue': 'http://localhost:4003/',
-        'app4React': 'http://localhost:4004/'
-      };
+        '/app1Angular8': 'http://localhost:4001/',
+        '/app2Angular9': 'http://localhost:4002/',
+        '/app3Vue': 'http://localhost:4003/',
+        '/app4React': 'http://localhost:4004/'
+    };
 
-      const iframe = <HTMLIFrameElement>document.getElementById('mfc');
-      iframe.frameBorder='0';
-      iframe.scrolling='no';
-      iframe.marginHeight='0';
-      iframe.marginWidth='0';      
-      iframe.onload = loadedEvt;
-      //iframe.onerror = loadingErrorEvt;
-      errorTimeout = setTimeout(loadingError, 5000);
-      load();
-      iframe.src = microFrontendsByRoute[this.path()];
+    const iframe = <HTMLIFrameElement>document.getElementById('mfc');
+    iframe.frameBorder='0';
+    iframe.scrolling='no';
+    iframe.marginHeight='0';
+    iframe.marginWidth='0';      
+    iframe.onload = loadedEvt;
+    //iframe.onerror = loadingErrorEvt;
+
+    errorTimeout = setTimeout(loadingError, errorTimeoutValue);
+    load();
+    iframe.src = microFrontendsByRoute[path];
 
     // => URL changed to /foo/bar
 }
 
+function noop(): void {
+    handleRoute();
+}
+
 function init() {
+    router.add('/app1Angular8', handleRoute);
+    router.add('/app2Angular9', handleRoute);
+    router.add('/app3Vue', handleRoute);
+    router.add('/app4React', handleRoute);
+    router.run();
     // Attach handleClicks to all A elements in the navigation
     let links = document.getElementsByClassName('navLinks');
     console.log('links', links);
@@ -125,7 +141,7 @@ function init() {
             Array.prototype.filter.call(as, function(a: any){
                 console.log(a.nodeName);
                 // Ensure to register click event lietner only once
-                router.on('navigate', onNavigate);
+                //router.on('navigate', handleRoute);
                 a.removeEventListener("click", handleClick, false);
                 a.addEventListener('click', handleClick, false);  
             });    
@@ -146,22 +162,3 @@ function init() {
 }
 
 init();
-
-/*
-links.each(element => {
-    document.addEventListener('click', function (event) {
-
-        // If the clicked element doesn't have the right selector, bail
-        if (!event.target.matches('.click-me')) return;
-    
-        // Don't follow the link
-        event.preventDefault();
-    
-        // Log the clicked element in the console
-        console.log(event.target);
-    
-    }, false);        
-});
-*/
-
-console.log(testMessage);
