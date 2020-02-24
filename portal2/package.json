@@ -35,6 +35,5 @@
     "webpack-dev-server": "^3.2.1",
     "webpack-md5-hash": "0.0.6"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

@@ -2,11 +2,63 @@ import './styles/style.scss';
 import * as utils from './Utils';
 import { Router, RouterMode } from "./router";
 
-console.log('hello, world');
+const microFrontendsByRoute: any = {
+    '/app1Angular8': 'http://localhost:4001/',
+    '/app2Angular9': 'http://localhost:4002/',
+    '/app3Vue': 'http://localhost:4003/',
+    '/app4React': 'http://localhost:4004/'
+};
+
+const routes: any = {
+    '/': {
+        'redirect': {
+            'url': '/home',
+            'target': '@self'
+        }
+    },
+    '/home': {
+        'internal': {
+            'default': true,
+            'target': '@self'
+        }
+    },
+    '/login': {
+        'internal': {
+            'target': '@self'
+        }
+    },
+    '/app1Angular8': {
+        'external': {
+            'url': 'http://localhost:4001/',
+            'target': 'content'
+        }
+    },
+    '/app2Angular9': {
+        'external': {
+            'url': 'http://localhost:4002/',
+            'target': 'content'
+        }
+    },
+    '/app3Vue': {
+        'external': {
+            'url': 'http://localhost:4003/',
+            'target': 'content'
+        }
+    },
+    '/app4React': {
+        'external': {
+            'url': 'http://localhost:4004/',
+            'target': 'content'
+        }
+    }
+};
+
 
 const errorTimeoutValue: number = 7000;
 
-let router = new Router(RouterMode.History);
+// History mode do not support loading the app throug the direct change of the url in the navigation bar of the browser. Let's use Hash mode instead.
+// let router = new Router(RouterMode.History);
+let router = new Router(RouterMode.Hash, {root: '/home', removeDomain: false});
 
 console.log(router);
 let errorTimeout: number;
@@ -97,13 +149,6 @@ function handleRoute() {
     let path = router.getCurrentPath();
     console.log('URL changed to %s', path);
 
-    const microFrontendsByRoute: any = {
-        '/app1Angular8': 'http://localhost:4001/',
-        '/app2Angular9': 'http://localhost:4002/',
-        '/app3Vue': 'http://localhost:4003/',
-        '/app4React': 'http://localhost:4004/'
-    };
-
     const iframe = <HTMLIFrameElement>document.getElementById('mfc');
     iframe.frameBorder='0';
     iframe.scrolling='no';
@@ -119,11 +164,13 @@ function handleRoute() {
     // => URL changed to /foo/bar
 }
 
-function noop(): void {
-    handleRoute();
+function handlePage(): void {
+    
 }
 
 function init() {
+    router.add('/home', handlePage);
+    router.add('/login', handlePage);
     router.add('/app1Angular8', handleRoute);
     router.add('/app2Angular9', handleRoute);
     router.add('/app3Vue', handleRoute);
