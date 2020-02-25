@@ -1,6 +1,7 @@
 import './styles/style.scss';
 import { Routes } from './routes';
-import { RouteHandler } from './routeHandler';
+import { Router, RouterMode } from './router';
+import { Navigation } from './Navigation';
 import { UIHandler } from './uiHandler';
 
 
@@ -49,10 +50,8 @@ const routes: Routes = {
 };
 
 
-
-let uiHandler = new UIHandler(document);
-let routeHandler = new RouteHandler(routes, uiHandler);
-
-uiHandler.setRouter(routeHandler);
+let router = new Router(RouterMode.Hash);
+let uiHandler = new UIHandler(router, document);
+let navigation = new Navigation(router, routes, uiHandler);
 uiHandler.init();
 

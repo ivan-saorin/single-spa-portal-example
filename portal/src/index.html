@@ -15,39 +15,40 @@
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-        
-        <a id="basePath" class="hide" href="/">basePath</a>
-        <header>
-            <img class="logo" src="assets/images/Test-Logo.svg" alt="logo">
-            <nav>
-                <ul class="navLinks">
-                    <li><a href="app1Angular8">Application 1</a></li>
-                    <li><a href="app2Angular9">Application 2</a></li>
-                    <li><a href="app3Vue">Application 3</a></li>
-                    <li><a href="app4React">Application 4</a></li>
-                </ul>
-            </nav>
-            <a class="cta" href="contact"><button>Contact</button></a>
-        </header>
-        <loading>
-            Loading...
-        </loading>
-        <content>
-            <iframe id="mfc"></iframe>
-        </content>
-        <home class="portal-page">
-            <h1>Welcome to the test portal.</h1>
-            <p>to continue please login: <a src="login">Login</a></p>
-            <p>Two users are available:
-                <ul>
-                    <li>demo / demo</li>
-                    <li>admin / demo</li>
-                </ul>
-            </p>
-        </home>
-        <login class="portal-page">
-
-        </login>
+        <div class="container">
+            <header>
+                <a id="basePath" href="/"><img class="logo" src="assets/images/Test-Logo.svg" alt="logo"></a>
+                <nav>
+                    <ul class="navLinks">
+                        <li><a href="home">Home</a></li>
+                        <li><a href="app1Angular8">Application 1</a></li>
+                        <li><a href="app2Angular9">Application 2</a></li>
+                        <li><a href="app3Vue">Application 3</a></li>
+                        <li><a href="app4React">Application 4</a></li>
+                    </ul>
+                </nav>
+                <a class="cta" href="contact"><button>Contact</button></a>
+            </header>
+            <loading>
+                Loading...
+            </loading>
+            <content>
+                <iframe id="mfc"></iframe>
+            </content>
+            <home class="portal-page">
+                <h1>Welcome to the test portal.</h1>
+                <p>to continue please login: <a src="login">Login</a></p>
+                <p>Two users are available:
+                    <ul>
+                        <li>demo / demo</li>
+                        <li>admin / demo</li>
+                    </ul>
+                </p>
+            </home>
+            <login class="portal-page">
+                <h1>Login Page</h1>
+            </login>
+        </div>
         <script src="<%= htmlWebpackPlugin.files.chunks.main.entry %>" async defer></script>
     </body>
 </html>
