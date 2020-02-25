@@ -23,6 +23,11 @@ const routes: Routes = {
             "target": "@self"
         }
     },
+    "/contact": {
+        "internal": {
+            "target": "@self"
+        }
+    },
     "/app1Angular8": {
         "external": {
             "url": "http://localhost:4001/",
@@ -32,6 +37,12 @@ const routes: Routes = {
     "/app2Angular9": {
         "external": {
             "url": "http://localhost:4002/",
+            "target": "content"
+        }
+    },
+    "/app2Angular9/flights": {
+        "external": {
+            "url": "http://localhost:4002/flights",
             "target": "content"
         }
     },
@@ -51,7 +62,7 @@ const routes: Routes = {
 
 
 let router = new Router(RouterMode.Hash);
-let uiHandler = new UIHandler(router, document);
+let uiHandler = new UIHandler(router, document, routes);
 let navigation = new Navigation(router, routes, uiHandler);
 uiHandler.init();
 

@@ -1,23 +1,25 @@
 import * as utils from './Utils';
 import { Router, RouterMode } from './router';
-
-const microFrontendsByRoute: any = {
-    '/': '/app3Vue',
-    '/app1Angular8': 'http://localhost:4001/',
-    '/app2Angular9': 'http://localhost:4002/',
-    '/app3Vue': 'http://localhost:4003/',
-    '/app4React': 'http://localhost:4004/'
-};
+import { Routes } from "./routes";
 
 export class UIHandler {
     private errorTimeoutValue: number = 7000;
     private errorTimeout: number;
 
-    constructor(private router: Router, private document: Document) {
+    constructor(private router: Router, private document: Document, private routes: Routes) {
         this.document = document;
         this.router = router;
     }
-    
+
+    private microFrontendByRoute(path: string): string {
+        if (this.routes[path] && this.routes[path].external.url) {
+            let url = this.routes[path].external.url;
+            console.log('FOUND: ', url);
+            return url;
+        }
+        return '';
+    }
+
     private getBasePathEl(): HTMLAnchorElement {
         return <HTMLAnchorElement> document.getElementById('basePath');
     }
@@ -81,8 +83,10 @@ export class UIHandler {
     
         // Log the clicked element in the console
         console.log(event.target);
+
+        let href = event.target.href ? event.target.href : event.target.parentNode.href;
     
-        let path = utils.removeStart(event.target.href, this.getBasePath());
+        let path = utils.removeStart(href, this.getBasePath());
         console.log(this, event);
         this.click(path);
     }
@@ -101,7 +105,7 @@ export class UIHandler {
     
         this.errorTimeout = setTimeout(this.loadingError, this.errorTimeoutValue);
         this.load();
-        iframe.src = microFrontendsByRoute[path];
+        iframe.src = this.microFrontendByRoute(path);
     
         // => URL changed to /foo/bar
     }
@@ -134,7 +138,7 @@ export class UIHandler {
     public handleRedirectPath = (): void => {
         let path = this.router ? this.router.getCurrentPath() : "";
         console.log('URL changed to redirect path: %s', path);
-        this.router.navigate(microFrontendsByRoute[path]);
+        this.router.navigate(this.microFrontendByRoute(path));
     }
 
     private initNavLinks(uiHandler: UIHandler) {
