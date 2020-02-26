@@ -1,4 +1,5 @@
 import { Component, HostListener} from '@angular/core';
+import { PostMessage } from './postMessage';
 
 @Component({
   selector: 'post-message',
@@ -8,6 +9,7 @@ import { Component, HostListener} from '@angular/core';
 export class PostMessageComponent {
   serverMessagePresent: boolean = false;
   serverMessage: string = "Hello!";
+  messanger: PostMessage;
   @HostListener('window:message',['$event'])
   onMessage(e) {
       console.log('message: ', e);
@@ -18,6 +20,15 @@ export class PostMessageComponent {
         'Message arrived from [' + e.origin + ']: ' + msg.text;
         
         setTimeout(() => this.serverMessagePresent = false, 4000);
+
+        if (!this.messanger) {
+            this.messanger = new PostMessage(window.parent, e.origin);
+        }
+
+        this.messanger.postMessage({
+            "sender": e.data.recipient,
+            "text": "Echoing.... " + msg.text
+        });
 
         //if (e.origin!="http://localhost:4200") {
         //  return false;

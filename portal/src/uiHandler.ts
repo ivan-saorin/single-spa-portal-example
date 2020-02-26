@@ -7,6 +7,7 @@ import { PostMessage } from './postMessage';
 export class UIHandler {
     private errorTimeoutValue: number = 7000;
     private errorTimeout: NodeJS.Timeout;
+    private messageTimeout: NodeJS.Timeout;
     private messenger: PostMessage;
 
     constructor(private router: Router, private document: Document, private routes: Routes) {
@@ -76,7 +77,22 @@ export class UIHandler {
     private getContentEl() {
         return <HTMLElement>document.getElementsByTagName('CONTENT')[0];
     }
-    
+
+    private getMessageEl() {
+        return <HTMLElement>document.getElementsByTagName('MESSAGE')[0];
+    }
+
+    private getAllowedPostMessageSources(): string[] {
+        var allowedSources: string[] = [];
+        for (const key in this.routes) {
+            //console.log('key: ', key, routes[key]);
+            if (this.routes[key].external) {
+                allowedSources.push(this.routes[key].external.url);
+            }
+        }
+        return allowedSources;
+    }
+
     private start() {
         let loadingEl = this.getLoadingEl();
         utils.removeClass(loadingEl, 'show');
@@ -186,6 +202,16 @@ export class UIHandler {
 
     }
 
+    private hideElement(name: string) {
+        let element = this.document.getElementsByTagName(name.toUpperCase())[0];
+        utils.removeClass(element, 'show');
+        utils.addClass(element, 'hide');
+    }
+
+    private hideMessage = () => {
+        this.hideElement('message');
+    }
+
     private hidePages(clazz: string) {        
         let elements = this.document.getElementsByClassName(clazz);
         Array.prototype.filter.call(elements, function(element: any){
@@ -193,6 +219,9 @@ export class UIHandler {
             utils.addClass(element, 'hide');
         });
         let contentEl = this.getContentEl();
+        utils.removeClass(contentEl, 'show');
+        utils.addClass(contentEl, 'hide');
+        let messageEl = this.getMessageEl();
         utils.removeClass(contentEl, 'show');
         utils.addClass(contentEl, 'hide');
     }
@@ -253,13 +282,36 @@ export class UIHandler {
         });    
     }
 
+    listen() {
+        window.addEventListener('message', event => {
+            // IMPORTANT: check the origin of the data!
+            let origin = event.origin + '/';
+            //console.log('origin: ', origin, 'allowedSources:', this.getAllowedPostMessageSources(), 'comparison:', (this.getAllowedPostMessageSources().indexOf(origin) > -1));
+            if (this.getAllowedPostMessageSources().indexOf(origin) > -1) {
+            //if (event.origin.startsWith(this.getBasePath())) { 
+                // The data was sent from your site.
+                // Data sent with postMessage is stored in event.data:
+                console.log(event.data);
+                let messageEl = this.getMessageEl();
+                messageEl.innerHTML = event.data.text;
+                this.showElement('message');
+                this.messageTimeout = setTimeout(this.hideMessage, 4000);
+            } else {
+                // The data was NOT sent from your site! 
+                // Be careful! Do not use it. This else branch is
+                // here just for clarity, you usually shouldn't need it.
+                return; 
+            } 
+        });
+    }
+
     public init() {
         
         let that = this;
         this.initNavLinks(that);
         this.initContact(that);
         this.initPostMessage(that);
-    
+        this.listen();
         // Hide loading and content element
         this.start();
     }

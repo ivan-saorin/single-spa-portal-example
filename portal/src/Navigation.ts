@@ -1,5 +1,5 @@
 import { Routes, Target } from "./routes";
-import { Router, RouterMode } from './router';
+import { Router } from './router';
 import { UIHandler } from './uiHandler';
 
 
