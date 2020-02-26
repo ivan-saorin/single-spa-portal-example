@@ -29,6 +29,10 @@ iframe {
   border: none; 
 } 
 
+button {
+  color: $light-text-color;
+}
+
 header {
   display: flex;
   justify-content: space-between;

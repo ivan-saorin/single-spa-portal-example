@@ -1,14 +1,18 @@
 import * as utils from './Utils';
 import { Router, RouterMode } from './router';
-import { Routes } from "./routes";
+import { Routes } from './routes';
+import * as url from 'url';
+import { PostMessage } from './postMessage';
 
 export class UIHandler {
     private errorTimeoutValue: number = 7000;
-    private errorTimeout: number;
+    private errorTimeout: NodeJS.Timeout;
+    private messenger: PostMessage;
 
     constructor(private router: Router, private document: Document, private routes: Routes) {
         this.document = document;
         this.router = router;
+        this.messenger = new PostMessage(window, this.getOrigin());
     }
 
     private microFrontendByRoute(path: string): string {
@@ -34,6 +38,33 @@ export class UIHandler {
         return basePathEl ? basePathEl.href : "";
     }
     
+    private getOrigin() {
+        let basePath = this.getBasePath();
+        let origin = basePath.substring(0, basePath.length - 1);
+        console.log('origin: ', origin);
+        return origin;
+    }
+
+    private getIFrameEl() {
+        return <HTMLIFrameElement>document.getElementsByTagName('IFRAME')[0];
+    }
+
+    private getIFrameWindow(): Window {
+        let iFrame = this.getIFrameEl();
+        return iFrame.contentWindow;
+    }
+
+    private getIFrameSrc() {
+        let iFrame = this.getIFrameEl();
+        return iFrame.src;
+    }
+
+    private getActiveMicrofrontendUrl() {
+        let src = this.getIFrameSrc();
+        var p = url.parse(src);
+        return p.protocol + '//' + p.host;
+    }
+
     private getLoadingEl() {
         return <HTMLElement>document.getElementsByTagName('LOADING')[0];
     }
@@ -95,6 +126,25 @@ export class UIHandler {
         console.error('Error loading content.');
     }
     
+    public handlePostMessageClick = (event: any): void => {
+    
+        // Don't follow the link
+        event.preventDefault();
+    
+        // Log the clicked element in the console
+        console.log(event.target);
+
+        let iFrameWindow = this.getIFrameWindow();
+        let activeMicrofronteEnd = this.getActiveMicrofrontendUrl();
+        this.messenger.postMessage({
+            "sender": this.getOrigin(),
+            "recipient": activeMicrofronteEnd,
+            "message": {
+                "text": "Hello World!"
+            }
+        }, iFrameWindow, activeMicrofronteEnd);
+    }
+
     public handleClick = (event: any): void => {
     
         // Don't follow the link
@@ -192,11 +242,23 @@ export class UIHandler {
         });    
     }
 
+    private initPostMessage(uiHandler: UIHandler) {
+        // Attach handleClicks to Post Message A element
+        let postMsgLinks = document.getElementsByClassName('postmsg');
+        Array.prototype.filter.call(postMsgLinks, function(postMsg: any){
+            console.log(postMsg.nodeName);
+            // Ensure to register click event lietner only once
+            postMsg.removeEventListener("click", uiHandler.handlePostMessageClick, false);
+            postMsg.addEventListener('click', uiHandler.handlePostMessageClick, false);  
+        });    
+    }
+
     public init() {
         
         let that = this;
         this.initNavLinks(that);
         this.initContact(that);
+        this.initPostMessage(that);
     
         // Hide loading and content element
         this.start();
