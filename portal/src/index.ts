@@ -3,6 +3,7 @@ import { Routes } from './routes';
 import { Router, RouterMode } from './router';
 import { Navigation } from './Navigation';
 import { UIHandler } from './uiHandler';
+import { Mediator } from './Mediator';
 
 
 const routes: Routes = {
@@ -66,3 +67,26 @@ let uiHandler = new UIHandler(router, document, routes);
 let navigation = new Navigation(router, routes, uiHandler);
 uiHandler.init();
 
+let mediator = new Mediator();
+
+mediator.subscribe('test.topic', (context: any, message: any) => {
+    console.warn('test.topic', message);
+})
+
+mediator.publish('test.topic', {test: 'toast'}).then((message: any) => {
+    console.warn('1 test.topic received', message);
+}, (rejected: any) => {
+    console.warn('1 test.topic rejected', rejected);
+});
+
+mediator.publish('test.topic', {test: 'toast'}).then((message: any) => {
+    console.warn('2 test.topic received', message);
+}, (rejected: any) => {
+    console.warn('2 test.topic rejected', rejected);
+});
+
+mediator.publish('test.topic2', {test: 'should not receive'}).then((message: any) => {
+    console.warn('test.topic2 received', message);
+}, (rejected: any) => {
+    console.warn('test.topic2 rejected', rejected);
+});
