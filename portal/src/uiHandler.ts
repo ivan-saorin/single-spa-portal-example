@@ -12,8 +12,13 @@ export class UIHandler {
     }
 
     private microFrontendByRoute(path: string): string {
-        if (this.routes[path] && this.routes[path].external.url) {
+        if (this.routes[path] && this.routes[path].external && this.routes[path].external.url) {
             let url = this.routes[path].external.url;
+            console.log('FOUND: ', url);
+            return url;
+        }
+        if (this.routes[path] && this.routes[path].redirect && this.routes[path].redirect.url) {
+            let url = this.routes[path].redirect.url;
             console.log('FOUND: ', url);
             return url;
         }
@@ -32,15 +37,23 @@ export class UIHandler {
     private getLoadingEl() {
         return <HTMLElement>document.getElementsByTagName('LOADING')[0];
     }
-    
+
+    private getErrorEl() {
+        return <HTMLElement>document.getElementsByTagName('ERROR')[0];
+    }
+
     private getContentEl() {
         return <HTMLElement>document.getElementsByTagName('CONTENT')[0];
     }
     
     private start() {
-        let loadingEl = this.getLoadingEl();    
+        let loadingEl = this.getLoadingEl();
         utils.removeClass(loadingEl, 'show');
         utils.addClass(loadingEl, 'hide');
+
+        let errorEl = this.getErrorEl();
+        utils.removeClass(errorEl, 'show');
+        utils.addClass(errorEl, 'hide');
     
         let contentEl = this.getContentEl();
         utils.removeClass(contentEl, 'show');
@@ -50,7 +63,6 @@ export class UIHandler {
     private load() {    
         this.hidePages("portal-page");
         let loadingEl = this.getLoadingEl();
-        loadingEl.innerHTML = 'Loading...';
         utils.removeClass(loadingEl, 'hide');
         utils.addClass(loadingEl, 'show');        
     }
@@ -70,9 +82,16 @@ export class UIHandler {
         //let iframe = <HTMLIFrameElement>ev.target;        
     }
     
-    public loadingError = () => {
-        let loadingEl = this.getLoadingEl();
-        loadingEl.innerHTML = 'Error loading content.';
+    public loadingError = () => {        
+        let loadingEl = this.getLoadingEl();    
+        utils.removeClass(loadingEl, 'show');
+        utils.addClass(loadingEl, 'hide');
+        
+        let errorEl = this.getErrorEl();
+        errorEl.innerHTML = 'Error loading content.';
+        utils.removeClass(errorEl, 'hide');
+        utils.addClass(errorEl, 'show');
+        clearTimeout(this.errorTimeout);
         console.error('Error loading content.');
     }
     

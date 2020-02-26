@@ -11,7 +11,7 @@ export class Navigation {
 
         
         for (const key in routes) {
-            console.log('key: ', key, routes[key]);
+            //console.log('key: ', key, routes[key]);
             this.addRoute(key, routes[key]);
         }
 
@@ -36,7 +36,7 @@ export class Navigation {
         if (fx == null) {
             throw new TypeError('Invalid target value: [' + target + ']');
         }
-        console.log('target: ', target);
+        //console.log('target: ', target);
         this.router.add(route, fx);
         if (fx == this.uiHandler.handleExternalPath ) {
             this.router.add(route + '/*', fx);
