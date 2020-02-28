@@ -20,6 +20,10 @@ This example stretch the idea of micro-frontends for Single Page Application and
    - `npm start`
 4. Open up http://localhost:8080 in a web browser.
 
+## How to update all npm dependencies
+
+[Follow this instructions](https://flaviocopes.com/update-npm-dependencies/)
+
 ## inter-app-communication (To be done)
 This topic has been discussed multiple times (i.e. [here](https://github.com/CanopyTax/single-spa/issues/112) or [here](https://github.com/CanopyTax/single-spa/issues/107)). There may be many solutions to solve this problem. In this repository I want you to show a solution that meets the following requirements:
 
