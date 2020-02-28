@@ -9,7 +9,7 @@ import { PostMessage } from './postMessage';
 export class PostMessageComponent {
   serverMessagePresent: boolean = false;
   serverMessage: string = "Hello!";
-  messanger: PostMessage;
+  messenger: PostMessage;
   
   @HostListener('window:message',['$event'])
   onMessage(e) {
@@ -22,11 +22,11 @@ export class PostMessageComponent {
         
         setTimeout(() => this.serverMessagePresent = false, 4000);
 
-        if (!this.messanger) {
-            this.messanger = new PostMessage(window.parent, e.origin);
+        if (!this.messenger) {
+            this.messenger = new PostMessage(window.parent, e.origin);
         }
 
-        this.messanger.postMessage({
+        this.messenger.postMessage({
             "sender": e.data.recipient,
             "text": "Echoing.... " + msg.text
         });

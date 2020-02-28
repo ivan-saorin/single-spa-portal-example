@@ -2,6 +2,7 @@
   <section class="todoapp">
     <header class="header">
       <h1>VueJS - Todos</h1>
+      <h4 class="message" v-if="messagePresent">{{getmessage}}</h4>
       <input class="new-todo" v-model="newTodoTitle" @keyup.enter="createTodo()" placeholder="What needs to be done?" autofocus>
     </header>
     <!-- This section should be hidden by default and shown when there are todos -->
@@ -22,12 +23,15 @@
 </template>
 
 <script lang="ts">
+import { PostMessage } from './postMessage';
 import TodoFooter from './TodoFooter.vue';
 import TodoHeader from './TodoHeader.vue';
 import TodoItem from './TodoItem.vue';
 
 import Vue from 'vue';
 import { AppState, Todo } from '../models';
+
+
 
 export default Vue.extend({
   components: {
@@ -42,6 +46,8 @@ export default Vue.extend({
 
       // Input box content.
       newTodoTitle: '',
+      msg: 'message',
+      messagePresent: false,
 
       // Current todo items.
       todos: [
@@ -130,7 +136,43 @@ export default Vue.extend({
     remaining(): Todo[] {
       return this.todos.filter(isNotCompleted);
     },
+    getmessage(): string {
+      return this.msg;
+    }
   },
+  mounted: function () { 
+    let that = this;
+    let messenger: PostMessage;
+    this.messagePresent = false;
+    let message: string = '';
+
+    window.addEventListener('message', e => { 
+
+          console.log('message: ', e);
+          if (e.data.message) {
+            that.messagePresent = true;
+            let msg = e.data.message;
+            that.msg = 
+            'Message arrived from [' + e.origin + ']: ' + msg.text;
+            
+            setTimeout(() => that.messagePresent = false, 4000);
+
+            if (!messenger) {
+                messenger = new PostMessage(window.parent, e.origin);
+            }
+
+            messenger.postMessage({
+                "sender": e.data.recipient,
+                "text": "Echoing.... " + msg.text
+            });
+
+            //if (e.origin!="http://localhost:4200") {
+            //  return false;
+            //}
+          }
+
+    });
+  }
 });
 
 function isCompleted(todo: Todo) {

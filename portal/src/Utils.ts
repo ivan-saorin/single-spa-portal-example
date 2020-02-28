@@ -29,3 +29,13 @@ export function removeClass(el: Element, className: string) {
 export function removeStart(string: string, stringToRemove: string): string {
     return string.substring(stringToRemove.length);
 }
+
+export function makeid(length: number) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+ }

@@ -152,11 +152,12 @@ export class UIHandler {
 
         let iFrameWindow = this.getIFrameWindow();
         let activeMicrofronteEnd = this.getActiveMicrofrontendUrl();
+        let m = "Hello World! (" + utils.makeid(6) + ")";
         this.messenger.postMessage({
             "sender": this.getOrigin(),
             "recipient": activeMicrofronteEnd,
             "message": {
-                "text": "Hello World!"
+                "text": m
             }
         }, iFrameWindow, activeMicrofronteEnd);
     }
