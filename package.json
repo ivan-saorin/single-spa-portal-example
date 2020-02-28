@@ -8,7 +8,7 @@
   },
   "scripts": {
     "install:apps": "concurrently \"npm i --prefix ./app1Angular8\" \"npm i --prefix ./app2Angular9\" \"npm i --prefix ./app3Vue\" \"npm i --prefix ./app4React\"",
-    "start": "concurrently \"npm start --prefix ./app1Angular8\" \"npm start --prefix ./app2Angular9\" \"npm start --prefix ./app3Vue\" \"npm start --prefix ./app4React\"",
+    "start": "concurrently \"npm start --prefix ./app1Angular8\" \"npm start --prefix ./app2Angular9\" \"npm start --prefix ./app3Vue\" \"npm start --prefix ./app4React\" \"npm start --prefix ./server\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
