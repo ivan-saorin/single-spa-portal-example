@@ -36,9 +36,9 @@ export class Mediator {
                     // Continue on failure
                     if (finishedPromises == promises) {
                       if (faileds) {
-                        reject(promises);
+                        reject();
                       } else {
-                        resolve(promises);
+                        resolve();
                       }
                     }        
                 }
@@ -70,14 +70,14 @@ export class Mediator {
                         resolve(result.then(checkFinished, callbackFail));
                     }
                 }
-                resolve(promises);
+                resolve();
             }
             else {
-                reject(0);
+                reject();
             }
     
             if (!promises) {
-              resolve(0);
+              resolve();
             }        
         });
         return promise;
