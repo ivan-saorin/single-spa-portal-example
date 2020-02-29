@@ -9,7 +9,7 @@ export class UIHandler {
     private errorTimeout: NodeJS.Timeout;
     private messageTimeout: NodeJS.Timeout;
     private messenger: PostMessage;
-    private target: any;
+    private target: HTMLElement;
 
     constructor(private router: Router, private document: Document, private routes: Routes) {
         this.document = document;
@@ -285,6 +285,24 @@ export class UIHandler {
         });    
     }
 
+    getUriOfOrigin(origin: string, pathName: string) {
+        for (const key in this.routes) {
+            //console.log('key: ', key, this.routes[key]);
+            if (this.routes[key].external && (origin == this.routes[key].external.url)) {
+                //console.log('FOUND: ', key);
+                return key;
+            }
+        }
+    }
+
+    getAnchorForUri(uri: string) {
+        if (uri.startsWith('/')) {
+            uri = uri.substring(1);
+        }
+        console.warn("Trying to find uri: ", uri);
+        return <HTMLAnchorElement> this.document.querySelector('a[href="' + uri + '"]');
+    }
+
     listen() {
         window.addEventListener('message', event => {
             // IMPORTANT: check the origin of the data!
@@ -295,10 +313,36 @@ export class UIHandler {
                 // The data was sent from your site.
                 // Data sent with postMessage is stored in event.data:
                 console.log(event.data);
-                let messageEl = this.getMessageEl();
-                messageEl.innerHTML = event.data.text;
-                this.showElement('message');
-                this.messageTimeout = setTimeout(this.hideMessage, 4000);
+
+                if (event.data.notification) {
+                    if (event.data.notification == "pageLoaded") {
+                        let uri = this.getUriOfOrigin(origin, event.data.pathname);                        
+                        let anchor: HTMLAnchorElement = this.getAnchorForUri(uri);
+                        if (this.target)
+                            this.target.classList.remove('active');
+                        anchor.classList.add('active');
+                        this.target = anchor;
+                    }
+                }
+                else if (event.data.notification) {
+                    if (event.data.notification == "pageLoaded") {
+                        let uri = this.getUriOfOrigin(origin, event.data.pathname);                        
+                        let anchor: HTMLAnchorElement = this.getAnchorForUri(uri);
+                        if (this.target)
+                            this.target.classList.remove('active');
+                        anchor.classList.add('active');
+                        this.target = anchor;
+                    }
+                }
+                else if (event.data.text) {
+                    let messageEl = this.getMessageEl();
+                    messageEl.innerHTML = event.data.text;
+                    this.showElement('message');
+                    this.messageTimeout = setTimeout(this.hideMessage, 4000);
+                }
+                else {
+                    console.error('Unsupported message from trusted source [', origin, ']: ', event.data);
+                }
             } else {
                 // The data was NOT sent from your site! 
                 // Be careful! Do not use it. This else branch is
