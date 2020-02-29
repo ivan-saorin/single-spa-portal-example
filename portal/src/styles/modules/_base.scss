@@ -29,10 +29,6 @@ iframe {
   border: none; 
 } 
 
-button {
-  color: $light-text-color;
-}
-
 header {
   display: flex;
   justify-content: space-between;
@@ -63,23 +59,42 @@ img.logo {
     padding: 0 20px;
 
     a {
+      display: flex;
+      padding: 9px 25px;
+      background-color: $color2;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      color: $color6;
       transition: all 0.3s ease 0s;
     }
 
-    a:hover {
-      color: #0088a9;
+    a:hover, a:active {
+      background-color: $color3;
     }
+
+    a:focus {
+      background-color: $color4;
+      color: $light-text-color;
+    }
+
+    a.active {
+      background-color: $color5;
+      color: $light-text-color;
+    }
+
   }
 }
 
 button {
   display: flex;
   padding: 9px 25px;
-  background-color: rgba(0,136,169,1);
+  background-color: $color4;
   border: none;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease 0s;
+  color: $light-text-color;
 }
 
 button:hover {

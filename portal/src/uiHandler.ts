@@ -9,6 +9,7 @@ export class UIHandler {
     private errorTimeout: NodeJS.Timeout;
     private messageTimeout: NodeJS.Timeout;
     private messenger: PostMessage;
+    private target: any;
 
     constructor(private router: Router, private document: Document, private routes: Routes) {
         this.document = document;
@@ -163,12 +164,16 @@ export class UIHandler {
     }
 
     public handleClick = (event: any): void => {
+        if (this.target) 
+            this.target.classList.remove('active');
+        this.target = event.target;
     
         // Don't follow the link
         event.preventDefault();
     
         // Log the clicked element in the console
         console.log(event.target);
+        //this.target.classList.add('active');
 
         let href = event.target.href ? event.target.href : event.target.parentNode.href;
     
@@ -214,11 +219,8 @@ export class UIHandler {
     }
 
     private hidePages(clazz: string) {        
-        let elements = this.document.getElementsByClassName(clazz);
-        Array.prototype.filter.call(elements, function(element: any){
-            utils.removeClass(element, 'show');
-            utils.addClass(element, 'hide');
-        });
+        //utils.processElementsClass(this.document, clazz, 'show', 'hide');
+        utils.processElementsClass2(this.document, clazz, 'show', 'hide');
         let contentEl = this.getContentEl();
         utils.removeClass(contentEl, 'show');
         utils.addClass(contentEl, 'hide');
@@ -253,7 +255,7 @@ export class UIHandler {
                 Array.prototype.filter.call(as, function(a: any){
                     console.log(a.nodeName);
                     // Ensure to register click event lietner only once
-                    //router.on('navigate', handleRoute);
+                    //router.on('navigate', handleRoute);                    
                     a.removeEventListener("click", uiHandler.handleClick, false);
                     a.addEventListener('click', uiHandler.handleClick, false);  
                 });    

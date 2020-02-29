@@ -26,6 +26,26 @@ export function removeClass(el: Element, className: string) {
     }
 }
 
+export function processElementsClass(document: HTMLDocument, selectorClass: string, classToRemove: string, classToAdd?: string) {
+    let elements = document.querySelectorAll(selectorClass);
+    Array.prototype.filter.call(elements, function(element: any){
+        removeClass(element, classToRemove);
+        if (classToAdd) {
+            addClass(element, classToAdd);
+        }
+    });
+}
+
+export function processElementsClass2(document: HTMLDocument, selectorClass: string, classToRemove: string, classToAdd?: string) {
+    let elements = document.getElementsByClassName(selectorClass);
+    Array.prototype.filter.call(elements, function(element: any){
+        removeClass(element, classToRemove);
+        if (classToAdd) {
+            addClass(element, classToAdd);
+        }
+    });
+}
+
 export function removeStart(string: string, stringToRemove: string): string {
     return string.substring(stringToRemove.length);
 }
