@@ -1,5 +1,6 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { PostMessage } from './postMessage/postMessage';
+import { guest }  from "./rimless";
 
 @Component({
   selector: 'flight-app',
@@ -25,6 +26,25 @@ export class AppComponent implements AfterViewInit {
           "notification": "pageLoaded",
           "pathname": pathname
       });
+
+      this.connect();
+  }
+
+  async connect() {
+    const connection = await guest.connect({
+      myIframeVariable: 42,
+      myIframeFunction: (value) => `hello ${value}`,
+    });
+    
+    // access variables on the host
+    console.log(connection.remote.myVariable); // 12
+    
+    // call remote procedures on host
+    const res = await connection.remote.myFunction("there");
+    console.log(res);   // hello there
+    
+    // close the connection
+    connection.close();
   }
 
 }

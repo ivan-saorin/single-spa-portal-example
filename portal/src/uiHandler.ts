@@ -3,6 +3,7 @@ import { Router, RouterMode } from './router';
 import { Routes } from './routes';
 import * as url from 'url';
 import { PostMessage } from './postMessage';
+import { RimLessHost } from './Mediation';
 
 export class UIHandler {
     private errorTimeoutValue: number = 7000;
@@ -10,6 +11,7 @@ export class UIHandler {
     private messageTimeout: NodeJS.Timeout;
     private messenger: PostMessage;
     private target: HTMLElement;
+    private host: RimLessHost;
 
     constructor(private router: Router, private document: Document, private routes: Routes) {
         this.document = document;
@@ -161,6 +163,7 @@ export class UIHandler {
                 "text": m
             }
         }, iFrameWindow, activeMicrofronteEnd);
+        this.host.sendMessage();
     }
 
     public handleClick = (event: any): void => {
@@ -361,6 +364,8 @@ export class UIHandler {
         this.listen();
         // Hide loading and content element
         this.start();
+        let iframe = this.getIFrameEl();        
+        this.host = new RimLessHost(iframe);
     }
 
 
