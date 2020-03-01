@@ -26,7 +26,6 @@
     "core-js": "^3.6.4",
     "fibers": "^4.0.2",
     "html-webpack-plugin": "^3.2.0",
-    "penpal": "^4.1.1",
     "rxjs": "^6.5.4",
     "zone.js": "~0.10.2"
   },

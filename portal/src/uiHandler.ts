@@ -314,8 +314,8 @@ export class UIHandler {
                 // Data sent with postMessage is stored in event.data:
                 console.log(event.data);
 
-                if (event.data.notification) {
-                    if (event.data.notification == "pageLoaded") {
+                if (event.data.handshake) {
+                    if (event.data.handshake == "pageLoaded") {
                         let uri = this.getUriOfOrigin(origin, event.data.pathname);                        
                         let anchor: HTMLAnchorElement = this.getAnchorForUri(uri);
                         if (this.target)
