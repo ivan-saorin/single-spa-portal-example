@@ -10,7 +10,7 @@ import { APP_EXTRA_OPTIONS, APP_ROUTES } from './app.routes';
 import { HomeComponent } from './home/home.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
-import { PostMessageComponent } from './postMessage/post.message.component';
+import { HostMessageComponent } from './mediation/host.message.component';
 
 @NgModule({
   imports: [
@@ -21,7 +21,7 @@ import { PostMessageComponent } from './postMessage/post.message.component';
   ],
   declarations: [
     AppComponent,
-    PostMessageComponent,
+    HostMessageComponent,
     SidebarComponent,
     NavbarComponent,
     HomeComponent,

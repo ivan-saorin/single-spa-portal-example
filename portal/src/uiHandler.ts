@@ -2,21 +2,19 @@ import * as utils from './Utils';
 import { Router, RouterMode } from './router';
 import { Routes } from './routes';
 import * as url from 'url';
-import { PostMessage } from './postMessage';
-import { RimLessHost } from './Mediation';
+import { Mediator } from './mediator';
 
 export class UIHandler {
     private errorTimeoutValue: number = 7000;
     private errorTimeout: NodeJS.Timeout;
     private messageTimeout: NodeJS.Timeout;
-    private messenger: PostMessage;
     private target: HTMLElement;
-    private host: RimLessHost;
+    private host: Mediator;
 
     constructor(private router: Router, private document: Document, private routes: Routes) {
         this.document = document;
         this.router = router;
-        this.messenger = new PostMessage(window, this.getOrigin());
+        this.host = new Mediator(this);
     }
 
     private microFrontendByRoute(path: string): string {
@@ -153,17 +151,23 @@ export class UIHandler {
         // Log the clicked element in the console
         console.log(event.target);
 
-        let iFrameWindow = this.getIFrameWindow();
         let activeMicrofronteEnd = this.getActiveMicrofrontendUrl();
         let m = "Hello World! (" + utils.makeid(6) + ")";
-        this.messenger.postMessage({
+        this.postMessage({
             "sender": this.getOrigin(),
             "recipient": activeMicrofronteEnd,
             "message": {
                 "text": m
             }
-        }, iFrameWindow, activeMicrofronteEnd);
-        this.host.sendMessage();
+        });
+    }
+
+    public async postMessage(message: any) {
+        if (!this.host.isConnected()) {
+            let iframe = this.getIFrameEl();
+            await this.host.connect(iframe);
+        }
+        await this.host.sendMessage(message);
     }
 
     public handleClick = (event: any): void => {
@@ -197,10 +201,16 @@ export class UIHandler {
         iframe.onload = this.loadedEvt;
         //iframe.onerror = loadingErrorEvt;
     
-        this.errorTimeout = setTimeout(this.loadingError, this.errorTimeoutValue);
+        //this.errorTimeout = setTimeout(this.loadingError, this.errorTimeoutValue);
         this.load();
         iframe.src = this.microFrontendByRoute(path);
-    
+        if (this.host.isConnected()) {
+            this.host.disconnect();
+        }
+        if (!this.host.isConnected()) {
+            let iframe = this.getIFrameEl();
+            this.host.connect(iframe);
+        }
         // => URL changed to /foo/bar
     }
     
@@ -236,7 +246,12 @@ export class UIHandler {
         let path = this.router ? this.router.getCurrentPath() : "";
         console.log('URL changed to internal path: %s', path);
         this.hidePages('portal-page');
-        this.showElement(path.substring(1));
+        let uri = path.substring(1);
+        this.showElement(uri);
+
+        let anchor: HTMLAnchorElement = this.getAnchorForUri(uri);
+        utils.processElementsClass(this.document, '.navLinks a', 'active');
+        anchor.classList.add('active');
     }
 
     public handleRedirectPath = (): void => {
@@ -289,24 +304,41 @@ export class UIHandler {
     }
 
     getUriOfOrigin(origin: string, pathName: string) {
+        if (!origin.endsWith('/')) {
+            origin = origin + '/';
+        }
         for (const key in this.routes) {
-            //console.log('key: ', key, this.routes[key]);
+            console.log('key: ', key, this.routes[key]);
             if (this.routes[key].external && (origin == this.routes[key].external.url)) {
-                //console.log('FOUND: ', key);
+                console.log('FOUND: ', key);
                 return key;
             }
         }
     }
 
-    getAnchorForUri(uri: string) {
+    getAnchorForUri(uri: string, id?: string): HTMLAnchorElement {
         if (uri.startsWith('/')) {
             uri = uri.substring(1);
         }
         console.warn("Trying to find uri: ", uri);
-        return <HTMLAnchorElement> this.document.querySelector('a[href="' + uri + '"]');
+        let a:HTMLAnchorElement = this.document.querySelector('a[href="' + uri + '"]');
+        if (a) {
+            return a;
+        }
+        uri = uri + id;
+        return this.document.querySelector('a[href="' + uri + '"]');
+    }
+
+    handleFrameLoaded(origin: string, id: string) {
+        let uri = this.getUriOfOrigin(origin, id);
+        let anchor: HTMLAnchorElement = this.getAnchorForUri(uri, id);
+        utils.processElementsClass(this.document, '.navLinks a', 'active');
+        anchor.classList.add('active');
+        this.target = anchor;
     }
 
     listen() {
+        /*
         window.addEventListener('message', event => {
             // IMPORTANT: check the origin of the data!
             let origin = event.origin + '/';
@@ -353,6 +385,7 @@ export class UIHandler {
                 return; 
             } 
         });
+        */
     }
 
     public init() {
@@ -364,8 +397,6 @@ export class UIHandler {
         this.listen();
         // Hide loading and content element
         this.start();
-        let iframe = this.getIFrameEl();        
-        this.host = new RimLessHost(iframe);
     }
 
 

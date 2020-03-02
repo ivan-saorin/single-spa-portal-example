@@ -1,16 +1,19 @@
 import { Component, HostListener} from '@angular/core';
-import { PostMessage } from './postMessage';
+import { Mediator } from './mediator';
 
 @Component({
-  selector: 'post-message',
-  template: '<p *ngIf="serverMessagePresent">{{serverMessage}}</p>',
-  styleUrls: ['./post.message.component.css']
+  selector: 'host-message',
+  template: '<p *ngIf="hostMessagePresent">{{hostMessage}}</p>',
+  styleUrls: ['./host.message.component.css']
 })
-export class PostMessageComponent {
-  serverMessagePresent: boolean = false;
-  serverMessage: string = "Hello!";
-  messenger: PostMessage;
+export class HostMessageComponent {
+  hostMessagePresent: boolean = false;
+  hostMessage: string = '';
+  mediator: Mediator;
+
   
+
+  /*
   @HostListener('window:message',['$event'])
   onMessage(e) {
       console.log('message: ', e);
@@ -36,5 +39,6 @@ export class PostMessageComponent {
         //}
       }
   }
+  */
 }
 

@@ -67,6 +67,7 @@ let uiHandler = new UIHandler(router, document, routes);
 let navigation = new Navigation(router, routes, uiHandler);
 uiHandler.init();
 
+/*
 let mediator = new Mediator();
 
 mediator.subscribe('test.topic', (context: any, message: any) => {
@@ -90,3 +91,4 @@ mediator.publish('test.topic2', {test: 'should not receive'}).then((message: any
 }, (rejected: any) => {
     console.warn('test.topic2 rejected', rejected);
 });
+*/
