@@ -11,8 +11,13 @@ export class Mediator {
         this.connection = await host.connect(iframe, {
             log: (...values: any[]) => console.log('[HOST]', ...values),
             frameLoaded: (sender: string, notification: string, origin: string, id: string) => this.uiHandler.handleFrameLoaded(sender, id),
-            frameLoaded2: (sender: string, notification: string, id: string) => console.log(`[HOST] ${notification} [${id}] from [${sender}]`)
+            textMessage: (sender: string, notification: string, text: string) => this.handleTextMessage(sender, notification, text)
         });
+    }
+
+    public handleTextMessage(sender: string, notification: string, text: string) {
+        console.log(`[HOST] [${text}]`);
+        this.uiHandler.handleTextMessage(text);
     }
 
     public async disconnect() {
@@ -26,8 +31,8 @@ export class Mediator {
 
     public async sendMessage(message: any) {
         // call remote procedures on host
-        console.log('[HOST] calling HOST.log');
-        const res = await this.connection.remote.log("Log from host").catch((err: any) => { console.error(err); });
+        console.log('[HOST] calling HOST.textMessage');
+        const res = await this.connection.remote.textMessage(message).catch((err: any) => { console.error(err); });
         //console.log('[HOST]', res);   // hello there
     }
 }

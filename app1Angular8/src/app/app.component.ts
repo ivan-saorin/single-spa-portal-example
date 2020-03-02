@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
-import { Mediator }  from "./mediation/Mediator";
+import { MediatorService } from './mediator.service';
 
 @Component({
   selector: 'flight-app',
@@ -7,16 +7,19 @@ import { Mediator }  from "./mediation/Mediator";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit, OnDestroy {
-  private mediator: Mediator;
 
-  constructor() {
+  constructor(private mediator: MediatorService) {
     
   }
   
   async ngAfterViewInit() {
       console.log('ngAfterViewInit');
-      if (!this.mediator) {
-        this.mediator = new Mediator();
+      //if (!this.mediator) {
+      //  this.mediator = new Mediator();
+      //}
+
+      if (this.mediator.isConnected()) {
+        await this.mediator.disconnect();
       }
 
       if (!this.mediator.isConnected()) {

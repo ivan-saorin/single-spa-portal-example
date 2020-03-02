@@ -1,4 +1,4 @@
-import * as utils from './Utils';
+import * as utils from './utils';
 import { Router, RouterMode } from './router';
 import { Routes } from './routes';
 import * as url from 'url';
@@ -153,12 +153,10 @@ export class UIHandler {
 
         let activeMicrofronteEnd = this.getActiveMicrofrontendUrl();
         let m = "Hello World! (" + utils.makeid(6) + ")";
-        this.postMessage({
+        this.host.sendMessage({
             "sender": this.getOrigin(),
             "recipient": activeMicrofronteEnd,
-            "message": {
-                "text": m
-            }
+            "text": m
         });
     }
 
@@ -327,6 +325,13 @@ export class UIHandler {
         }
         uri = uri + id;
         return this.document.querySelector('a[href="' + uri + '"]');
+    }
+
+    handleTextMessage(text: string) {
+        let messageEl = this.getMessageEl();
+        messageEl.innerHTML = text;
+        this.showElement('message');
+        this.messageTimeout = setTimeout(this.hideMessage, 4000);
     }
 
     handleFrameLoaded(origin: string, id: string) {
