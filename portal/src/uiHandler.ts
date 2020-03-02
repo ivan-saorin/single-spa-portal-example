@@ -318,6 +318,9 @@ export class UIHandler {
         if (uri.startsWith('/')) {
             uri = uri.substring(1);
         }
+        if (id && (id != '/home')) {
+            uri += id;
+        }
         console.warn("Trying to find uri: ", uri);
         let a:HTMLAnchorElement = this.document.querySelector('a[href="' + uri + '"]');
         if (a) {
