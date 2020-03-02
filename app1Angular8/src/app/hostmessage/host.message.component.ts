@@ -1,29 +1,28 @@
-import { Component, AfterViewInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, Output, Input, EventEmitter } from '@angular/core';
 import { MediatorService } from '../mediator.service';
 
 @Component({
   selector: 'host-message',
-  template: '<p *ngIf="hostMessagePresent" (receive)="onReceive($event)">{{hostMessage}}</p>',
+  template: '<p *ngIf="hostMessagePresent">{{hostMessage}}</p>',
   styleUrls: ['./host.message.component.css']
 })
 export class HostMessageComponent implements AfterViewInit, OnDestroy {
   hostMessagePresent: boolean = false;
   hostMessage: string = '';
 
-  @Output() receive = new EventEmitter<any>();
+  @Input() receive = new EventEmitter<any>();
 
   constructor(private mediator: MediatorService) {
     mediator.setReceiver(this.receive);
   }
   
-  onReceive(event) {
-    this.hostMessage = event;
-    this.hostMessagePresent=true;    
-    setTimeout(() => this.hostMessagePresent=false, 4000);
-  }
-
   ngAfterViewInit() {
-
+    this.receive.subscribe((event) => {
+      console.log(event);
+      this.hostMessage = `[${event.sender}] ${event.text}`;
+      this.hostMessagePresent=true;    
+      setTimeout(() => this.hostMessagePresent=false, 4000);  
+    });
   }
 
   ngOnDestroy() {
