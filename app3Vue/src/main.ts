@@ -17,14 +17,7 @@ const router = new VueRouter({
 });
 
 Vue.use(VueRouter);
-/*
-const app = new Vue({
-    el: '#app',
-    template: '<router-view></router-view>',
-    router,
-    mixins: [VueRouter],
-});
-*/
+
 const app = new Vue({
     el: '#app',
     template: '<router-view></router-view>',

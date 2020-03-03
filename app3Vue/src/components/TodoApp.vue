@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { PostMessage } from './postMessage';
+import { Mediator } from '../mediator';
 import TodoFooter from './TodoFooter.vue';
 import TodoHeader from './TodoHeader.vue';
 import TodoItem from './TodoItem.vue';
@@ -31,7 +31,7 @@ import TodoItem from './TodoItem.vue';
 import Vue from 'vue';
 import { AppState, Todo } from '../models';
 
-
+let mediator: Mediator;
 
 export default Vue.extend({
   components: {
@@ -140,38 +140,23 @@ export default Vue.extend({
       return this.msg;
     }
   },
-  mounted: function () { 
-    let that = this;
-    let messenger: PostMessage;
+  mounted: async function () { 
+    let that = this;    
     this.messagePresent = false;
     let message: string = '';
 
-    window.addEventListener('message', e => { 
+    mediator = new Mediator(this);
 
-          console.log('message: ', e);
-          if (e.data.message) {
-            that.messagePresent = true;
-            let msg = e.data.message;
-            that.msg = 
-            'Message arrived from [' + e.origin + ']: ' + msg.text;
-            
-            setTimeout(() => that.messagePresent = false, 4000);
-
-            if (!messenger) {
-                messenger = new PostMessage(window.parent, e.origin);
-            }
-
-            messenger.postMessage({
-                "sender": e.data.recipient,
-                "text": "Echoing.... " + msg.text
-            });
-
-            //if (e.origin!="http://localhost:4200") {
-            //  return false;
-            //}
-          }
-
-    });
+    if (!mediator.isConnected()) {
+      await mediator.connect();
+    }
+    //let href = window.location.href;
+    let pathname = window.location.pathname;
+    console.log('window.location: ', window.location.href);
+    await mediator.frameLoaded(window.origin, pathname);
+  },
+  destroyed: function () { 
+    mediator.disconnect();
   }
 });
 

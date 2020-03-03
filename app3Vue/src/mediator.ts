@@ -2,7 +2,8 @@ import guest from "./rimless/guest";
 
 export class Mediator {
   private connection: any = null;
-  constructor() {
+
+  constructor(private vueApp: any) {
 
   }
 
@@ -15,6 +16,9 @@ export class Mediator {
 
   public handleTextMessage(message: any) {
     console.log('[GUEST]', message);
+    this.vueApp.msg = message.text;
+    this.vueApp.messagePresent = true;
+    setTimeout(() => this.vueApp.messagePresent = false, 4000);
     this.textMessage(`Echoing message from host: ${message.text}`);
   }
 
