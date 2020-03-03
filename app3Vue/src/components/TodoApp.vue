@@ -5,6 +5,9 @@
       <h4 class="message" v-if="messagePresent">{{getmessage}}</h4>
       <input class="new-todo" v-model="newTodoTitle" @keyup.enter="createTodo()" placeholder="What needs to be done?" autofocus>
     </header>
+    <ul class="navigation">
+      <li v-for="(nav, index) in navs" :key="index"><a href="#/" :nav="nav" @click="navigate(index)">{{nav.substring(1)}}</a></li>
+    </ul>
     <!-- This section should be hidden by default and shown when there are todos -->
     <section class="main" v-if="todos.length">
       <input class="toggle-all" type="checkbox">
@@ -48,6 +51,7 @@ export default Vue.extend({
       newTodoTitle: '',
       msg: 'message',
       messagePresent: false,
+      navs: [],
 
       // Current todo items.
       todos: [
@@ -95,6 +99,11 @@ export default Vue.extend({
         ...current,
         completed: !current.completed
       });
+    },
+
+    navigate(index: number) {
+      const nav = this.navs[index];
+      mediator.navigate(nav, {sample: "payload"});
     },
 
     /**

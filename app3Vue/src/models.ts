@@ -6,6 +6,7 @@ export interface AppState {
     currentView?: RouteViews;
     msg: string;
     messagePresent: boolean;
+    navs: string[],
     todos: Todo[];
 }
 

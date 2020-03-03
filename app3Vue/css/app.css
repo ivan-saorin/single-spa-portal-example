@@ -1,0 +1,16 @@
+section.todoapp ul.navigation li{
+    display: flex;
+    display: inline-block;
+    padding: 7px 17px;
+    background-color: #f1faee;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    color: #333;
+    transition: all 0.3s ease 0s;
+    text-decoration: none;
+    list-style-type: none;
+    list-style: none;
+    font-size: 10px;
+    font-family: 'Courier New', Courier, monospace;
+} 

@@ -1,5 +1,10 @@
 import guest from "./rimless/guest";
 
+interface IFrameLoaded {
+    allowedNavigations: string[],
+    payload: any
+}
+  
 export class Mediator {
   private connection: any = null;
 
@@ -41,7 +46,22 @@ export class Mediator {
   public async frameLoaded(origin: string, id: string) {
       // call remote procedures on host
       console.log(`[GUEST] calling HOST.frameLoaded [${origin}] [${id}]`);
-        const res = await this.connection.remote.frameLoaded(window.origin, 'frameLoaded', origin, id).catch((err: any) => { console.error(err); });
-        //console.log('[GUEST]', res);   
+      const res = await this.connection.remote.frameLoaded(window.origin, 'frameLoaded', origin, id).catch((err: any) => { console.error(err); });
+      //console.log('[GUEST]', res);   
+      let response = <IFrameLoaded> res;
+      this.vueApp.navs = response.allowedNavigations;
+      console.log('[GUEST] allowed navigations', response.allowedNavigations);
+      console.log('[GUEST] received payload', response.payload);
   }
+
+  public async navigate(url: string, payload: any) {
+    if (payload.origin) {
+      payload._origin = window.origin;
+    }
+    else {
+      payload.origin = window.origin;
+    }
+    const res = await this.connection.remote.navigate(url, payload).catch((err: any) => { console.error(err); });
+  }
+
 }
