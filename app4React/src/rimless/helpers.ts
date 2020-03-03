@@ -16,6 +16,7 @@ export function isTrustedRemote(event: any) {
  * @param event
  */
 export function isWorker() {
+  /* eslint-disable-next-line no-restricted-globals */
   return typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope
 }
 

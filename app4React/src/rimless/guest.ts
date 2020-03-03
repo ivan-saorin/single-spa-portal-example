@@ -26,6 +26,7 @@ function connect(schema: ISchema = {}, options: any = {}): Promise<IConnection> 
 
       // close the connection and all listeners when called
       const close = () => {
+        /* eslint-disable-next-line no-restricted-globals */
         self.removeEventListener(events.MESSAGE, handleHandshakeResponse);
         unregisterRemote();
         unregisterLocal();
@@ -39,6 +40,7 @@ function connect(schema: ISchema = {}, options: any = {}): Promise<IConnection> 
     }
 
     // subscribe to HANDSHAKE REPLY MESSAGES
+    /* eslint-disable-next-line no-restricted-globals */
     self.addEventListener(events.MESSAGE, handleHandshakeResponse);
 
     const payload = {
@@ -51,6 +53,7 @@ function connect(schema: ISchema = {}, options: any = {}): Promise<IConnection> 
       if (connected) return clearInterval(interval);
 
       // publish the HANDSHAKE REQUEST
+      /* eslint-disable-next-line no-restricted-globals */
       if (isWorker()) (self as any).postMessage(payload);
       else window.parent.postMessage(payload, "*");
 

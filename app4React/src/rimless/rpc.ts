@@ -51,14 +51,18 @@ export function registerLocalMethods(
       }
 
       if (guest) guest.postMessage(payload);
+      /* eslint-disable-next-line no-restricted-globals */
       else if (isWorker()) (self as any).postMessage(payload);
       else event.source.postMessage(payload, event.origin);
     }
 
-    // subscribe to the call event
-    if (guest) guest.addEventListener(events.MESSAGE, handleCall);
-    else self.addEventListener(events.MESSAGE, handleCall);
+    // subscribe to the call event    
+    if (guest) 
+      guest.addEventListener(events.MESSAGE, handleCall);
+    else /* eslint-disable-next-line no-restricted-globals */
+      self.addEventListener(events.MESSAGE, handleCall);
 
+    /* eslint-disable-next-line no-restricted-globals */
     listeners.push(() => self.removeEventListener(events.MESSAGE, handleCall));
   });
 
@@ -132,13 +136,19 @@ export function createRPC(
         connectionID: _connectionID,
       };
 
-      if (guest) guest.addEventListener(events.MESSAGE, handleResponse);
-      else self.addEventListener(events.MESSAGE, handleResponse);
+      if (guest) 
+        guest.addEventListener(events.MESSAGE, handleResponse);
+      else /* eslint-disable-next-line no-restricted-globals */
+        self.addEventListener(events.MESSAGE, handleResponse);
+      /* eslint-disable-next-line no-restricted-globals */
       listeners.push(() => self.removeEventListener(events.MESSAGE, handleResponse));
 
-      if (guest) guest.postMessage(payload);
-      else if (isWorker()) (self as any).postMessage(payload);
-      else event.source.postMessage(payload, event.origin);
+      if (guest) 
+        guest.postMessage(payload);
+      else if (isWorker()) /* eslint-disable-next-line no-restricted-globals */
+        (self as any).postMessage(payload);
+      else 
+        event.source.postMessage(payload, event.origin);
     });
   };
 }
