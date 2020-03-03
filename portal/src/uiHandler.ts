@@ -318,7 +318,10 @@ export class UIHandler {
         if (uri.startsWith('/')) {
             uri = uri.substring(1);
         }
-        if (id && (id != '/home')) {
+        if (uri.endsWith('/')) {
+            uri = uri.substring(0, uri.length - 1);
+        }
+        if (id && (id != '/') && (id != '/home')) {
             uri += id;
         }
         console.warn("Trying to find uri: ", uri);
