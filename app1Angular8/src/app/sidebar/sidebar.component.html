@@ -22,6 +22,13 @@
       </a>
     </li>
 
+    <li *ngFor="let item of navs">
+      <a (click)="navigate(item)">
+        <i class="ti-arrow-top-right"></i>
+        <p>{{item.substring(1)}}</p>
+      </a>
+    </li>
+
     <!--
     <li>
         <a routerLink="passenger-search">

@@ -1,12 +1,18 @@
 import guest from "./rimless/guest";
 import { Injectable, EventEmitter } from '@angular/core';
 
+interface IFrameLoaded {
+  allowedNavigations: string[],
+  payload: any
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class MediatorService {
   private connection: any = null;
   private receive: EventEmitter<any>;
+  private allowedNavs: EventEmitter<any>;
 
   constructor() {
 
@@ -14,6 +20,10 @@ export class MediatorService {
 
   setReceiver(receiver: EventEmitter<any>) {
     this.receive = receiver;
+  }
+
+  setAllowedNavs(allowedNavs: EventEmitter<any>) {
+    this.allowedNavs = allowedNavs;
   }
 
   public async connect() {
@@ -48,7 +58,21 @@ export class MediatorService {
   public async frameLoaded(origin: string, id: string) {
       // call remote procedures on host
       console.log(`[GUEST] calling HOST.frameLoaded [${origin}] [${id}]`);
-        const res = await this.connection.remote.frameLoaded(window.origin, 'frameLoaded', origin, id).catch((err: any) => { console.error(err); });
-        //console.log('[GUEST]', res);   
+      const res = await this.connection.remote.frameLoaded(window.origin, 'frameLoaded', origin, id).catch((err: any) => { console.error(err); });
+      
+      let response = <IFrameLoaded> res;
+      this.allowedNavs.emit(response.allowedNavigations);
+      console.log('[GUEST] allowed navigations', response.allowedNavigations);
+      console.log('[GUEST] received payload', response.payload);
+  }
+
+  public async navigate(url: string, payload: any) {
+    if (payload.origin) {
+      payload._origin = window.origin;
+    }
+    else {
+      payload.origin = window.origin;
+    }
+    const res = await this.connection.remote.navigate(url, payload).catch((err: any) => { console.error(err); });
   }
 }

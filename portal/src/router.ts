@@ -129,7 +129,7 @@ export class Router extends EventTarget {
 		let routeSegments = this.getPathSegments(route.path);
 		let args = new Map<string, string>();
 
-		console.log(pathSegments, routeSegments);
+		//console.log(pathSegments, routeSegments);
 
 		if (pathSegments.length != routeSegments.length) return false;
 

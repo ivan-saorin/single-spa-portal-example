@@ -20,15 +20,50 @@ export class UIHandler {
     private microFrontendByRoute(path: string): string {
         if (this.routes[path] && this.routes[path].external && this.routes[path].external.url) {
             let url = this.routes[path].external.url;
-            console.log('FOUND: ', url);
+            //console.log('FOUND: ', url);
             return url;
         }
         if (this.routes[path] && this.routes[path].redirect && this.routes[path].redirect.url) {
             let url = this.routes[path].redirect.url;
-            console.log('FOUND: ', url);
+            //console.log('FOUND: ', url);
             return url;
         }
         return '';
+    }
+
+    private getAllowedRoutes(exclude?: string[]): string[] {
+        if (exclude) {
+            for (let i = 0; i < exclude.length; i++) {
+                if (exclude[i].endsWith('/')) {
+                    exclude[i] = exclude[i].substring(0, exclude[i].length -1);
+                }
+            }
+        }
+        var routes: string[] = [];
+        for (const key in this.routes) {
+            //console.log('key: ', key, routes[key]);
+            if (this.routes[key].external && this.routes[key].external.url) {
+                if (exclude && exclude.length > 0) {
+                    let url = this.routes[key].external.url;
+                    if (url.endsWith('/')) {
+                        url = url.substring(0, url.length -1);
+                    }
+
+                    if (exclude.indexOf(url) == -1) {
+                        routes.push(key);
+                    }
+                }
+                else {
+                    routes.push(key);
+                }
+            }
+        }
+        return routes;
+    }
+
+    public getAllowedNavigations(): string[] {
+        let url = this.getIFrameSrc();
+        return this.getAllowedRoutes([url]);
     }
 
     private getBasePathEl(): HTMLAnchorElement {
@@ -51,10 +86,12 @@ export class UIHandler {
         return <HTMLIFrameElement>document.getElementsByTagName('IFRAME')[0];
     }
 
+    /*
     private getIFrameWindow(): Window {
         let iFrame = this.getIFrameEl();
         return iFrame.contentWindow;
     }
+    */
 
     private getIFrameSrc() {
         let iFrame = this.getIFrameEl();
@@ -82,8 +119,8 @@ export class UIHandler {
     private getMessageEl() {
         return <HTMLElement>document.getElementsByTagName('MESSAGE')[0];
     }
-
-    private getAllowedPostMessageSources(): string[] {
+    
+    private getAllowedSources(): string[] {
         var allowedSources: string[] = [];
         for (const key in this.routes) {
             //console.log('key: ', key, routes[key]);
@@ -184,7 +221,7 @@ export class UIHandler {
     
         let path = utils.removeStart(href, this.getBasePath());
         console.log(this, event);
-        this.click(path);
+        this.navigate(path);
     }
 
     public handleExternalPath = (): void => {
@@ -261,15 +298,14 @@ export class UIHandler {
     private initNavLinks(uiHandler: UIHandler) {
         // Attach handleClicks to all A elements in the navigation
         let links = document.getElementsByClassName('navLinks');
-        console.log('links', links);
+        //console.log('links', links);
         Array.prototype.filter.call(links, function(ul: any){
-            console.log(ul.nodeName);
+            //console.log(ul.nodeName);
             let lis = ul.getElementsByTagName('LI');
             Array.prototype.filter.call(lis, function(li: any){
-                console.log(li.nodeName);
+                //console.log(li.nodeName);
                 let as = li.getElementsByTagName('A');
                 Array.prototype.filter.call(as, function(a: any){
-                    console.log(a.nodeName);
                     // Ensure to register click event lietner only once
                     //router.on('navigate', handleRoute);                    
                     a.removeEventListener("click", uiHandler.handleClick, false);
@@ -283,7 +319,7 @@ export class UIHandler {
         // Attach handleClicks to Contact A element
         let ctaLinks = document.getElementsByClassName('cta');
         Array.prototype.filter.call(ctaLinks, function(cta: any){
-            console.log(cta.nodeName);
+            //console.log(cta.nodeName);
             // Ensure to register click event lietner only once
             cta.removeEventListener("click", uiHandler.handleClick, false);
             cta.addEventListener('click', uiHandler.handleClick, false);  
@@ -294,7 +330,7 @@ export class UIHandler {
         // Attach handleClicks to Post Message A element
         let postMsgLinks = document.getElementsByClassName('postmsg');
         Array.prototype.filter.call(postMsgLinks, function(postMsg: any){
-            console.log(postMsg.nodeName);
+            //console.log(postMsg.nodeName);
             // Ensure to register click event lietner only once
             postMsg.removeEventListener("click", uiHandler.handlePostMessageClick, false);
             postMsg.addEventListener('click', uiHandler.handlePostMessageClick, false);  
@@ -306,9 +342,9 @@ export class UIHandler {
             origin = origin + '/';
         }
         for (const key in this.routes) {
-            console.log('key: ', key, this.routes[key]);
+            //console.log('key: ', key, this.routes[key]);
             if (this.routes[key].external && (origin == this.routes[key].external.url)) {
-                console.log('FOUND: ', key);
+                //console.log('FOUND: ', key);
                 return key;
             }
         }
@@ -323,14 +359,16 @@ export class UIHandler {
         }
         if (id && (id != '/') && (id != '/home')) {
             uri += id;
-        }
-        console.warn("Trying to find uri: ", uri);
+        }        
         let a:HTMLAnchorElement = this.document.querySelector('a[href="' + uri + '"]');
         if (a) {
+            console.log("activate element: ", a);
             return a;
         }
         uri = uri + id;
-        return this.document.querySelector('a[href="' + uri + '"]');
+        a = this.document.querySelector('a[href="' + uri + '"]');
+        console.log("activate element: ", a);
+        return a;
     }
 
     handleTextMessage(text: string) {
@@ -348,70 +386,28 @@ export class UIHandler {
         this.target = anchor;
     }
 
-    listen() {
-        /*
-        window.addEventListener('message', event => {
-            // IMPORTANT: check the origin of the data!
-            let origin = event.origin + '/';
-            //console.log('origin: ', origin, 'allowedSources:', this.getAllowedPostMessageSources(), 'comparison:', (this.getAllowedPostMessageSources().indexOf(origin) > -1));
-            if (this.getAllowedPostMessageSources().indexOf(origin) > -1) {
-            //if (event.origin.startsWith(this.getBasePath())) { 
-                // The data was sent from your site.
-                // Data sent with postMessage is stored in event.data:
-                console.log(event.data);
-
-                if (event.data.handshake) {
-                    if (event.data.handshake == "pageLoaded") {
-                        let uri = this.getUriOfOrigin(origin, event.data.pathname);                        
-                        let anchor: HTMLAnchorElement = this.getAnchorForUri(uri);
-                        if (this.target)
-                            this.target.classList.remove('active');
-                        anchor.classList.add('active');
-                        this.target = anchor;
-                    }
-                }
-                else if (event.data.notification) {
-                    if (event.data.notification == "pageLoaded") {
-                        let uri = this.getUriOfOrigin(origin, event.data.pathname);                        
-                        let anchor: HTMLAnchorElement = this.getAnchorForUri(uri);
-                        if (this.target)
-                            this.target.classList.remove('active');
-                        anchor.classList.add('active');
-                        this.target = anchor;
-                    }
-                }
-                else if (event.data.text) {
-                    let messageEl = this.getMessageEl();
-                    messageEl.innerHTML = event.data.text;
-                    this.showElement('message');
-                    this.messageTimeout = setTimeout(this.hideMessage, 4000);
-                }
-                else {
-                    console.error('Unsupported message from trusted source [', origin, ']: ', event.data);
-                }
-            } else {
-                // The data was NOT sent from your site! 
-                // Be careful! Do not use it. This else branch is
-                // here just for clarity, you usually shouldn't need it.
-                return; 
-            } 
-        });
-        */
-    }
-
     public init() {
         
         let that = this;
         this.initNavLinks(that);
         this.initContact(that);
         this.initPostMessage(that);
-        this.listen();
+
+        /*
+        console.log(this.getAllowedSources());
+        console.log(this.getActiveMicrofrontendUrl());
+        console.log(this.getAllowedRoutes());
+        let url = this.getIFrameSrc();
+        console.log(this.getAllowedRoutes([url]));
+        */
+
+
         // Hide loading and content element
         this.start();
     }
 
 
-    private click(this: UIHandler, path: string) {
+    public navigate(this: UIHandler, path: string) {
         console.log('want to navigate to:', path);
         this.router.navigate(path);
     }
