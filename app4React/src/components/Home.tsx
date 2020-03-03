@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link, RouteComponentProps } from 'react-router-dom';
-import { PostMessage } from './postMessage';
 import axios from 'axios';
+import { Mediator } from '../mediator';
 
 
 interface IState {
@@ -10,45 +10,33 @@ interface IState {
     messagePresent: boolean;
 }
 
+let mediator: Mediator;
+
 export default class Home extends React.Component<RouteComponentProps, IState> {
     constructor(props: RouteComponentProps) {
         super(props);
         this.state = { customers: [], message: '', messagePresent: false }
     }
 
-    public componentDidMount(): void {
-        let messenger: PostMessage;
+    public async componentDidMount() {
+        mediator = new Mediator(this);
         this.setState( {messagePresent: false} );
-    
-        window.addEventListener('message', e => { 
-    
-              console.log('message: ', e);
-              if (e.data.message) {
-                this.setState( {messagePresent: true} );
-                let msg = e.data.message;
-                this.setState( {message: 'Message arrived from [' + e.origin + ']: ' + msg.text} )
-                
-                setTimeout(() => this.setState( {messagePresent: false} ), 4000);
-    
-                if (!messenger) {
-                    messenger = new PostMessage(window.parent, e.origin);
-                }
-    
-                messenger.postMessage({
-                    "sender": e.data.recipient,
-                    "text": "Echoing.... " + msg.text
-                });
-    
-                //if (e.origin!="http://localhost:4200") {
-                //  return false;
-                //}
-              }
-    
-        });
+
+        if (!mediator.isConnected()) {
+        await mediator.connect();
+        }
+        //let href = window.location.href;
+        let pathname = window.location.pathname;
+        console.log('window.location: ', window.location.href);
+        await mediator.frameLoaded(window.origin, pathname);
 
         axios.get(`http://localhost:3200/customers`).then(data => {
             this.setState({ customers: data.data })
         })
+    }
+
+    public componentWillUnmount() {
+        mediator.disconnect();
     }
 
     public deleteCustomer(id: number) {
