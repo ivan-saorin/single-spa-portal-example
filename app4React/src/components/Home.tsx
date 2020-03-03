@@ -8,6 +8,7 @@ interface IState {
     customers: any[];
     message: string;
     messagePresent: boolean;
+    navs: string[];
 }
 
 let mediator: Mediator;
@@ -15,7 +16,7 @@ let mediator: Mediator;
 export default class Home extends React.Component<RouteComponentProps, IState> {
     constructor(props: RouteComponentProps) {
         super(props);
-        this.state = { customers: [], message: '', messagePresent: false }
+        this.state = { customers: [], message: '', messagePresent: false, navs: [] }
     }
 
     public async componentDidMount() {
@@ -51,8 +52,19 @@ export default class Home extends React.Component<RouteComponentProps, IState> {
         const customers = this.state.customers;
         let messagePresent = this.state.messagePresent;
         let message = this.state.message;
-        return (
+        let navs = this.state.navs;
+        return (    
             <div>
+                <nav className="submenu">
+                    <ul>
+                        {navs.map(nav => (
+                        <li >
+                            <a href="#" onClick={() => mediator.navigate(nav, {sample:"payload"})}>{nav.substring(1)}</a>
+                        </li>
+                        ))}
+                    </ul>
+                </nav>
+
                 {messagePresent && (
                     <div className="text-center">
                         <h2>{message}</h2>

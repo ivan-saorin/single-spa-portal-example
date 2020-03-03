@@ -37,6 +37,14 @@ nav ul li a:hover {
   text-decoration: none;
 }
 
+nav.submenu {
+  width: 62%;
+  margin: 0 auto;
+  background: #282c34bd;
+  height: 30px;
+  line-height: 28px;
+}
+
 table {
   margin-top: 50px;
 }
