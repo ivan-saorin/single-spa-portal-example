@@ -27,8 +27,10 @@ export class Mediator {
   }
 
   public async disconnect() {
+    if (this.isConnected()) {
       this.connection.close();
       this.connection = null;
+    }
   }
 
   public isConnected(): boolean {

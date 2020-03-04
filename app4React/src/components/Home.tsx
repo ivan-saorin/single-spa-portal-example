@@ -57,11 +57,11 @@ export default class Home extends React.Component<RouteComponentProps, IState> {
             <div>
                 <nav className="submenu">
                     <ul>
-                        {navs.map(nav => (
-                        <li >
+                        {navs.map(function(nav, i) {
+                        return <li key={i}>
                             <a href="#" onClick={() => mediator.navigate(nav, {sample:"payload"})}>{nav.substring(1)}</a>
                         </li>
-                        ))}
+                        })}
                     </ul>
                 </nav>
 
