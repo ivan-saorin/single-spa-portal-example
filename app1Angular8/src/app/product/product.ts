@@ -1,4 +1,4 @@
-export class Customer {
+export class Product {
   id: number;
   from: string;
   to: string;

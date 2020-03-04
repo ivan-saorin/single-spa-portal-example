@@ -1,18 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import { CustomerService } from './customer.service';
+import { ProductService } from './product.service';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
-describe('CustomerService', () => {
-  let service: CustomerService;
+describe('ProductService', () => {
+  let service: ProductService;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [CustomerService]
+      providers: [ProductService]
     });
 
-    service = TestBed.get(CustomerService);
+    service = TestBed.get(ProductService);
     httpMock = TestBed.get(HttpTestingController);
   });
 

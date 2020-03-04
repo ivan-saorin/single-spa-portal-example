@@ -1,25 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
-import { CustomerService } from '../customer.service';
-import { Customer } from '../customer';
+import { ProductService } from '../product.service';
+import { Product } from '../product';
 import { map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 @Component({
-  selector: 'app-customer-edit',
-  templateUrl: './customer-edit.component.html'
+  selector: 'app-product-edit',
+  templateUrl: './product-edit.component.html'
 })
-export class CustomerEditComponent implements OnInit {
+export class ProductEditComponent implements OnInit {
 
   id: string;
-  customer: Customer;
+  product: Product;
   feedback: any = {};
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private customerService: CustomerService) {
+    private productService: ProductService) {
   }
 
   ngOnInit() {
@@ -29,12 +29,12 @@ export class CustomerEditComponent implements OnInit {
       .pipe(
         map(p => p.id),
         switchMap(id => {
-          if (id === 'new') { return of(new Customer()); }
-          return this.customerService.findById(id);
+          if (id === 'new') { return of(new Product()); }
+          return this.productService.findById(id);
         })
       )
-      .subscribe(customer => {
-          this.customer = customer;
+      .subscribe(product => {
+          this.product = product;
           this.feedback = {};
         },
         err => {
@@ -44,12 +44,12 @@ export class CustomerEditComponent implements OnInit {
   }
 
   save() {
-    this.customerService.save(this.customer).subscribe(
-      customer => {
-        this.customer = customer;
+    this.productService.save(this.product).subscribe(
+      product => {
+        this.product = product;
         this.feedback = {type: 'success', message: 'Save was successful!'};
         setTimeout(() => {
-          this.router.navigate(['/customers']);
+          this.router.navigate(['/products']);
         }, 1000);
       },
       err => {
@@ -59,6 +59,6 @@ export class CustomerEditComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/customers']);
+    this.router.navigate(['/products']);
   }
 }

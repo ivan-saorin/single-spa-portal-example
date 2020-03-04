@@ -1,4 +1,4 @@
-export class CustomerFilter {
+export class ProductFilter {
     from = '';
     to = '';
 }

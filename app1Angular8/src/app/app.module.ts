@@ -1,4 +1,4 @@
-import { CustomerModule } from './customer/customer.module';
+import { ProductModule } from './product/product.module';
 import { HttpClientModule } from '@angular/common/http';
 
 import { NgModule } from '@angular/core';
@@ -16,7 +16,7 @@ import { HostMessageComponent } from './hostmessage/host.message.component';
   imports: [
     BrowserModule,
     HttpClientModule,
-    CustomerModule,    
+    ProductModule,    
     RouterModule.forRoot([...APP_ROUTES], {...APP_EXTRA_OPTIONS}),
   ],
   declarations: [

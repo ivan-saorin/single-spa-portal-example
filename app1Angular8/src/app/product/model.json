@@ -1,0 +1,41 @@
+{
+    "title": "Product",
+    "entity": "product",
+    "api": {
+      "url": "http://localhost:3200/products"
+    },
+    "filter": [
+      "from",
+      "to"
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "isId": true,
+        "type": "number",
+        "label": "Id",
+        "default": 0,
+        "control": "text"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "label": "Name"
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "label": "Description"
+      },
+      {
+        "name": "price",
+        "type": "number",
+        "label": "Price"
+      },
+      {
+        "name": "quantity",
+        "type": "number",
+        "label": "Quantity"
+      }
+    ]
+}

@@ -1,26 +1,26 @@
-import { Customer } from './customer';
-import { CustomerFilter } from './customer-filter';
+import { Product } from './product';
+import { ProductFilter } from './product-filter';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
 @Injectable()
-export class CustomerService {
-  customerList: Customer[] = [];
+export class ProductService {
+  productList: Product[] = [];
 
   constructor(private http: HttpClient) {
   }
 
-  findById(id: string): Observable<Customer> {
-    const url = `http://localhost:3200/customers/${id}`;
+  findById(id: string): Observable<Product> {
+    const url = `http://localhost:3200/products/${id}`;
     const params = { 'id': id };
     const headers = new HttpHeaders().set('Accept', 'application/json');
-    return this.http.get<Customer>(url, {params, headers});
+    return this.http.get<Product>(url, {params, headers});
   }
 
-  load(filter: CustomerFilter): void {
+  load(filter: ProductFilter): void {
     this.find(filter).subscribe(result => {
-        this.customerList = result;
+        this.productList = result;
       },
       err => {
         console.error('error loading', err);
@@ -28,8 +28,8 @@ export class CustomerService {
     );
   }
 
-  find(filter: CustomerFilter): Observable<Customer[]> {
-    const url = `http://localhost:3200/customers`;
+  find(filter: ProductFilter): Observable<Product[]> {
+    const url = `http://localhost:3200/products`;
     const headers = new HttpHeaders().set('Accept', 'application/json');
 
     const params = {
@@ -37,31 +37,31 @@ export class CustomerService {
       'to': filter.to,
     };
 
-    return this.http.get<Customer[]>(url, {params, headers});
+    return this.http.get<Product[]>(url, {params, headers});
   }
 
-  save(entity: Customer): Observable<Customer> {
+  save(entity: Product): Observable<Product> {
     let params = new HttpParams();
     let url = '';
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://localhost:3200/customers/${entity.id.toString()}`;
+      url = `http://localhost:3200/products/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());
-      return this.http.put<Customer>(url, entity, {headers, params});
+      return this.http.put<Product>(url, entity, {headers, params});
     } else {
-      url = `http://localhost:3200/customers`;
-      return this.http.post<Customer>(url, entity, {headers, params});
+      url = `http://localhost:3200/products`;
+      return this.http.post<Product>(url, entity, {headers, params});
     }
   }
 
-  delete(entity: Customer): Observable<Customer> {
+  delete(entity: Product): Observable<Product> {
     let params = new HttpParams();
     let url = '';
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://localhost:3200/customers/${entity.id.toString()}`;
+      url = `http://localhost:3200/products/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());
-      return this.http.delete<Customer>(url, {headers, params});
+      return this.http.delete<Product>(url, {headers, params});
     }
     return null;
   }

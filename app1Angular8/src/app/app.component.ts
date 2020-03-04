@@ -2,7 +2,7 @@ import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { MediatorService } from './mediator.service';
 
 @Component({
-  selector: 'customer-app',
+  selector: 'product-app',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
