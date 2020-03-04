@@ -1,25 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
-import { FlightService } from '../flight.service';
-import { Flight } from '../flight';
+import { CustomerService } from '../customer.service';
+import { Customer } from '../customer';
 import { map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 @Component({
-  selector: 'app-flight-edit',
-  templateUrl: './flight-edit.component.html'
+  selector: 'app-customer-edit',
+  templateUrl: './customer-edit.component.html'
 })
-export class FlightEditComponent implements OnInit {
+export class CustomerEditComponent implements OnInit {
 
   id: string;
-  flight: Flight;
+  customer: Customer;
   feedback: any = {};
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private flightService: FlightService) {
+    private customerService: CustomerService) {
   }
 
   ngOnInit() {
@@ -29,12 +29,12 @@ export class FlightEditComponent implements OnInit {
       .pipe(
         map(p => p.id),
         switchMap(id => {
-          if (id === 'new') { return of(new Flight()); }
-          return this.flightService.findById(id);
+          if (id === 'new') { return of(new Customer()); }
+          return this.customerService.findById(id);
         })
       )
-      .subscribe(flight => {
-          this.flight = flight;
+      .subscribe(customer => {
+          this.customer = customer;
           this.feedback = {};
         },
         err => {
@@ -44,12 +44,12 @@ export class FlightEditComponent implements OnInit {
   }
 
   save() {
-    this.flightService.save(this.flight).subscribe(
-      flight => {
-        this.flight = flight;
+    this.customerService.save(this.customer).subscribe(
+      customer => {
+        this.customer = customer;
         this.feedback = {type: 'success', message: 'Save was successful!'};
         setTimeout(() => {
-          this.router.navigate(['/flights']);
+          this.router.navigate(['/customers']);
         }, 1000);
       },
       err => {
@@ -59,6 +59,6 @@ export class FlightEditComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/flights']);
+    this.router.navigate(['/customers']);
   }
 }

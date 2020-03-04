@@ -1,4 +1,4 @@
-export class Flight {
+export class Customer {
   id: number;
   from: string;
   to: string;

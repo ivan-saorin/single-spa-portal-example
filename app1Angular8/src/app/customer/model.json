@@ -1,8 +1,8 @@
 {
-    "title": "Flight",
-    "entity": "flight",
+    "title": "Customer",
+    "entity": "customer",
     "api": {
-      "url": "http://www.angular.at/api/flight"
+      "url": "http://localhost:3200/customers"
     },
     "filter": [
       "from",

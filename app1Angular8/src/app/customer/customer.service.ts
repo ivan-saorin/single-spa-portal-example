@@ -1,26 +1,26 @@
-import { Flight } from './flight';
-import { FlightFilter } from './flight-filter';
+import { Customer } from './customer';
+import { CustomerFilter } from './customer-filter';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
 @Injectable()
-export class FlightService {
-  flightList: Flight[] = [];
+export class CustomerService {
+  customerList: Customer[] = [];
 
   constructor(private http: HttpClient) {
   }
 
-  findById(id: string): Observable<Flight> {
-    const url = `http://www.angular.at/api/flight/${id}`;
+  findById(id: string): Observable<Customer> {
+    const url = `http://localhost:3200/customers/${id}`;
     const params = { 'id': id };
     const headers = new HttpHeaders().set('Accept', 'application/json');
-    return this.http.get<Flight>(url, {params, headers});
+    return this.http.get<Customer>(url, {params, headers});
   }
 
-  load(filter: FlightFilter): void {
+  load(filter: CustomerFilter): void {
     this.find(filter).subscribe(result => {
-        this.flightList = result;
+        this.customerList = result;
       },
       err => {
         console.error('error loading', err);
@@ -28,8 +28,8 @@ export class FlightService {
     );
   }
 
-  find(filter: FlightFilter): Observable<Flight[]> {
-    const url = `http://www.angular.at/api/flight`;
+  find(filter: CustomerFilter): Observable<Customer[]> {
+    const url = `http://localhost:3200/customers`;
     const headers = new HttpHeaders().set('Accept', 'application/json');
 
     const params = {
@@ -37,31 +37,31 @@ export class FlightService {
       'to': filter.to,
     };
 
-    return this.http.get<Flight[]>(url, {params, headers});
+    return this.http.get<Customer[]>(url, {params, headers});
   }
 
-  save(entity: Flight): Observable<Flight> {
+  save(entity: Customer): Observable<Customer> {
     let params = new HttpParams();
     let url = '';
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://www.angular.at/api/flight/${entity.id.toString()}`;
+      url = `http://localhost:3200/customers/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());
-      return this.http.put<Flight>(url, entity, {headers, params});
+      return this.http.put<Customer>(url, entity, {headers, params});
     } else {
-      url = `http://www.angular.at/api/flight`;
-      return this.http.post<Flight>(url, entity, {headers, params});
+      url = `http://localhost:3200/customers`;
+      return this.http.post<Customer>(url, entity, {headers, params});
     }
   }
 
-  delete(entity: Flight): Observable<Flight> {
+  delete(entity: Customer): Observable<Customer> {
     let params = new HttpParams();
     let url = '';
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://www.angular.at/api/flight/${entity.id.toString()}`;
+      url = `http://localhost:3200/customers/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());
-      return this.http.delete<Flight>(url, {headers, params});
+      return this.http.delete<Customer>(url, {headers, params});
     }
     return null;
   }
