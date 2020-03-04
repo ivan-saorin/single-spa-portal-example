@@ -12,7 +12,7 @@ export class FlightService {
   }
 
   findById(id: string): Observable<Flight> {
-    const url = `http://www.angular.at/api/flight/${id}`;
+    const url = `http://localhost:3200/flights/${id}`;
     const params = { 'id': id };
     const headers = new HttpHeaders().set('Accept', 'application/json');
     return this.http.get<Flight>(url, {params, headers});
@@ -29,13 +29,10 @@ export class FlightService {
   }
 
   find(filter: FlightFilter): Observable<Flight[]> {
-    const url = `http://www.angular.at/api/flight`;
+    const url = `http://localhost:3200/flights`;
     const headers = new HttpHeaders().set('Accept', 'application/json');
 
-    const params = {
-      'from': filter.from,
-      'to': filter.to,
-    };
+    const params = {};
 
     return this.http.get<Flight[]>(url, {params, headers});
   }
@@ -45,11 +42,11 @@ export class FlightService {
     let url = '';
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://www.angular.at/api/flight/${entity.id.toString()}`;
+      url = `http://localhost:3200/flights/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());
       return this.http.put<Flight>(url, entity, {headers, params});
     } else {
-      url = `http://www.angular.at/api/flight`;
+      url = `http://localhost:3200/flights`;
       return this.http.post<Flight>(url, entity, {headers, params});
     }
   }
@@ -59,7 +56,7 @@ export class FlightService {
     let url = '';
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://www.angular.at/api/flight/${entity.id.toString()}`;
+      url = `http://localhost:3200/flights/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());
       return this.http.delete<Flight>(url, {headers, params});
     }

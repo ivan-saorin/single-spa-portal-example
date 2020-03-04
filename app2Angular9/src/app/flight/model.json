@@ -2,7 +2,7 @@
     "title": "Flight",
     "entity": "flight",
     "api": {
-      "url": "http://www.angular.at/api/flight"
+      "url": "http://localhost:3200/flights"
     },
     "filter": [
       "from",
