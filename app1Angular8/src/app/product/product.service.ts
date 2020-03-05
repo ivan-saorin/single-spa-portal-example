@@ -3,12 +3,13 @@ import { ProductFilter } from './product-filter';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class ProductService {
   productList: Product[] = [];
 
-  constructor(private http: HttpClient) {
+  constructor(private router: Router, private http: HttpClient) {
   }
 
   findById(id: string): Observable<Product> {
@@ -24,6 +25,9 @@ export class ProductService {
       },
       err => {
         console.error('error loading', err);
+        if (err.status && err.status === 401) {
+          this.router.navigateByUrl('/login');
+        }
       }
     );
   }
