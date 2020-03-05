@@ -27,8 +27,11 @@ function verifyToken(token){
 }
 
 // Check if the user exists in database
-function isAuthenticated({myuser, password}){
-  return userdb.users.findIndex(user => user.user === myuser && user.password === password) !== -1
+function isAuthenticated({user, password}){
+  console.log(user);
+  console.log(password);
+  console.log(userdb.users);
+  return userdb.users.findIndex(u => u.user === user && u.password === password) !== -1
 }
 
 // Register New User
@@ -73,14 +76,16 @@ fs.readFile("./users.json", (err, data) => {
 // Create token for new user
   const access_token = createToken({user, password})
   console.log("Access Token:" + access_token);
-  res.status(200).json({access_token})
-})
+    res.status(200).json({access_token})
+  });
 
 // Login to one of the users from ./users.json
 server.post('/auth/login', (req, res) => {
   console.log("login endpoint called; request body:");
   console.log(req.body);
   const {user, password} = req.body;
+  console.log('user', user);
+  console.log('pwd', password);
   if (isAuthenticated({user, password}) === false) {
     const status = 401
     const message = 'Incorrect user or password'
@@ -92,9 +97,8 @@ server.post('/auth/login', (req, res) => {
   res.status(200).json({access_token})
 })
 
-server.use(cors);
-
 server.use(/^(?!\/auth).*$/,  (req, res, next) => {
+  console.log('authorization: ', req.headers.authorization);
   if (req.headers.authorization === undefined || req.headers.authorization.split(' ')[0] !== 'Bearer') {
     const status = 401
     const message = 'Error in authorization format'
@@ -104,6 +108,7 @@ server.use(/^(?!\/auth).*$/,  (req, res, next) => {
   try {
     let verifyTokenResult;
      verifyTokenResult = verifyToken(req.headers.authorization.split(' ')[1]);
+    console.log('verifyTokenResult: ', verifyTokenResult);
 
      if (verifyTokenResult instanceof Error) {
        const status = 401
@@ -111,15 +116,16 @@ server.use(/^(?!\/auth).*$/,  (req, res, next) => {
        res.status(status).json({status, message})
        return
      }
-     next()
+     next(); // for CORS
+     next();
   } catch (err) {
     const status = 401
     const message = 'Error access_token is revoked'
     res.status(status).json({status, message})
   }
 })
-
-server.use(router)
+server.use(cors);
+server.use(router);
 
 server.listen(3200, () => {
   console.log('Run Auth API Server')

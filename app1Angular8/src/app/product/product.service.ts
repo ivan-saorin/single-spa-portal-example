@@ -32,10 +32,13 @@ export class ProductService {
     const url = `http://localhost:3200/products`;
     const headers = new HttpHeaders().set('Accept', 'application/json');
 
+    /*
     const params = {
       'from': filter.from,
       'to': filter.to,
     };
+    */
+   const params = {};
 
     return this.http.get<Product[]>(url, {params, headers});
   }

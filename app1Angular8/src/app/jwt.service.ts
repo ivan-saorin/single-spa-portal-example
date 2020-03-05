@@ -12,7 +12,7 @@ export class JwtService {
     constructor(private httpClient: HttpClient, public jwtHelper: JwtHelperService) { }
 
     public isAuthenticated(): boolean {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('access_token');
         // Check whether the token is expired and return
         // true or false
         return !this.jwtHelper.isTokenExpired(token);
@@ -22,9 +22,15 @@ export class JwtService {
         let user: string = userInfo.user;
         let p: string= userInfo.password;
         console.log('login ', user, p);
+        /*
         let body = new FormData();
         body.set('user', user);
         body.set('password', p);
+        */
+       let body: any = {
+          "user": user,
+          "password": p
+       }
         const httpOptions = {
             headers: new HttpHeaders({ 
                 'Accept': 'application/json',
@@ -35,17 +41,11 @@ export class JwtService {
         return this.httpClient.post<{access_token:  string}>('http://localhost:3200/auth/login', body, httpOptions).subscribe(
             res => {
                 console.warn('login < access_token', res.access_token);
-                localStorage.setItem('access_token', res.access_token);    
+                localStorage.setItem('access_token', res.access_token);
+                return {}; 
             },
             err => console.log(err)
         );
-        
-        /*
-        .pipe(tap(res => {
-            console.warn('login < access_token', res.access_token);
-            localStorage.setItem('access_token', res.access_token);
-        }))
-        */
     }
 
     register(userInfo: User) {

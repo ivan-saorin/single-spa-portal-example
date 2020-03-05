@@ -40,8 +40,9 @@ export class LoginComponent implements OnInit {
       //console.error(this.password.errors);
       return;
     }
-    this.jwtService.login(this.loginForm.value);
-    this.router.navigateByUrl('/home');
+    this.jwtService.login(this.loginForm.value).add(() => {
+      this.router.navigateByUrl('/home');
+    });    
   }
 
   logout(): void {
