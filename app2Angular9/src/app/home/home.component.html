@@ -9,8 +9,8 @@
       rights for the reqeusted action. Login with a respective user account!
     </div>
 
-    <button (click)="login()" class="btn btn-default">Login</button>
-    <button (click)="logout()" class="btn btn-default">Logout</button>
+    <button *ngIf="needsLogin" (click)="login()" class="btn btn-default">Login</button>
+    <button *ngIf="!needsLogin" (click)="logout()" class="btn btn-default">Logout</button>
 
     <!--
     <tabbed-pane [activeId]="0">

@@ -1,5 +1,6 @@
 import {Component, OnInit, ViewEncapsulation} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {Router, ActivatedRoute} from '@angular/router';
+import { JwtService } from '../jwt.service';
 
 @Component({
   selector: 'app-home',
@@ -8,28 +9,33 @@ import {ActivatedRoute} from '@angular/router';
   encapsulation: ViewEncapsulation.None
 })
 export class HomeComponent implements OnInit {
+  needsLogin: boolean = false;
 
   constructor(
-    private route: ActivatedRoute) {
+    private router: Router,
+    private jwtService: JwtService) {
   }
 
-  needsLogin: boolean;
-  _userName: string = '';
 
   ngOnInit() {
-    this.needsLogin = !!this.route.snapshot.params['needsLogin'];
-  }
-
-  get userName(): string {
-    return this._userName;
+    console.log('ngOnInit');
+    this.needsLogin = !this.jwtService.isAuthenticated();
+    console.log('needsLogin', this.needsLogin);
   }
 
   login(): void {
-    this._userName = 'Max';
+    this.needsLogin = !this.jwtService.isAuthenticated();
+    if (this.needsLogin) {
+      this.router.navigateByUrl('/login');
+    }
   }
 
   logout(): void {
-    this._userName = '';
+    this.needsLogin = !this.jwtService.isAuthenticated();
+    if (!this.needsLogin) {
+      this.jwtService.logout();    
+      this.login();
+    }
   }
 
 

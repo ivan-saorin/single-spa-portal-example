@@ -3,12 +3,13 @@ import { FlightFilter } from './flight-filter';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class FlightService {
   flightList: Flight[] = [];
 
-  constructor(private http: HttpClient) {
+  constructor(private router: Router, private http: HttpClient) {
   }
 
   findById(id: string): Observable<Flight> {
@@ -24,6 +25,9 @@ export class FlightService {
       },
       err => {
         console.error('error loading', err);
+        if (err.status && err.status === 401) {
+          this.router.navigateByUrl('/login');
+        }
       }
     );
   }
