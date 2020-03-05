@@ -36,16 +36,16 @@ export class LoginComponent implements OnInit {
     console.log(this.loginForm.value);
     this.isSubmitted = true;
     if(this.loginForm.invalid){
-      console.error(this.user.errors);
-      console.error(this.password.errors);
+      //console.error(this.user.errors);
+      //console.error(this.password.errors);
       return;
     }
     this.jwtService.login(this.loginForm.value);
-    this.router.navigateByUrl('/admin');
+    this.router.navigateByUrl('/home');
   }
 
   logout(): void {
-    
+    this.jwtService.logout();
   }
 
 }

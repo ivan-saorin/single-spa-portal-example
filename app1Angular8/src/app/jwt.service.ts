@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { User } from './login/models';
@@ -21,17 +21,40 @@ export class JwtService {
     login(userInfo: User) {
         let user: string = userInfo.user;
         let p: string= userInfo.password;
-        return this.httpClient.post<{access_token:  string}>('localhost:3200/auth/login', {user, p}).pipe(tap(res => {
+        console.log('login ', user, p);
+        let body = new FormData();
+        body.set('user', user);
+        body.set('password', p);
+        const httpOptions = {
+            headers: new HttpHeaders({ 
+                'Accept': 'application/json',
+                'Content-Type': 'application/json', 
+            })
+        };
+
+        return this.httpClient.post<{access_token:  string}>('http://localhost:3200/auth/login', body, httpOptions).subscribe(
+            res => {
+                console.warn('login < access_token', res.access_token);
+                localStorage.setItem('access_token', res.access_token);    
+            },
+            err => console.log(err)
+        );
+        
+        /*
+        .pipe(tap(res => {
+            console.warn('login < access_token', res.access_token);
             localStorage.setItem('access_token', res.access_token);
         }))
+        */
     }
 
     register(userInfo: User) {
         let user: string = userInfo.user;
         let p: string= userInfo.password;
-        return this.httpClient.post<{access_token: string}>('localhost:3200/auth/register', {user, p}).pipe(tap(res => {
-        this.login(userInfo);
-    }))
+        return this.httpClient.post<{access_token: string}>('http://localhost:3200/auth/register', {user, p}).pipe(tap(res => {
+            console.warn('register < access_token', res.access_token);
+            this.login(userInfo);
+        }))
     }
 
     logout() {

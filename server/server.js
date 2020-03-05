@@ -1,6 +1,7 @@
 const fs = require('fs')
 const bodyParser = require('body-parser')
 const jsonServer = require('json-server')
+var cors = require('cors');
 const jwt = require('jsonwebtoken')
 
 const server = jsonServer.create()
@@ -26,8 +27,8 @@ function verifyToken(token){
 }
 
 // Check if the user exists in database
-function isAuthenticated({user, password}){
-  return userdb.users.findIndex(user => user.user === user && user.password === password) !== -1
+function isAuthenticated({myuser, password}){
+  return userdb.users.findIndex(user => user.user === myuser && user.password === password) !== -1
 }
 
 // Register New User
@@ -90,6 +91,8 @@ server.post('/auth/login', (req, res) => {
   console.log("Access Token:" + access_token);
   res.status(200).json({access_token})
 })
+
+server.use(cors);
 
 server.use(/^(?!\/auth).*$/,  (req, res, next) => {
   if (req.headers.authorization === undefined || req.headers.authorization.split(' ')[0] !== 'Bearer') {
