@@ -148,7 +148,7 @@ export function createRPC(
       else if (isWorker()) /* eslint-disable-next-line no-restricted-globals */
         (self as any).postMessage(payload);
       else 
-        event.source.postMessage(payload, event.origin);
+        (event.source || event.target).postMessage(payload, event.origin);
     });
   };
 }
