@@ -4,19 +4,22 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { JwtService } from '../jwt.service';
 
 @Injectable()
 export class FlightService {
   private baseUrl: string = 'http://localhost:3200';
   flightList: Flight[] = [];
 
-  constructor(private router: Router, private http: HttpClient) {
+  constructor(private router: Router, private http: HttpClient, private jwtService: JwtService) {
   }
 
   findById(id: string): Observable<Flight> {
     const url = `${this.baseUrl}/flights/${id}`;
     const params = { 'id': id };
-    const headers = new HttpHeaders().set('Accept', 'application/json');
+    const headers = new HttpHeaders()
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${this.jwtService.accessToken}`);
     return this.http.get<Flight>(url, {params, headers});
   }
 
@@ -35,7 +38,9 @@ export class FlightService {
 
   find(filter: FlightFilter): Observable<Flight[]> {
     const url = `${this.baseUrl}/flights`;
-    const headers = new HttpHeaders().set('Accept', 'application/json');
+    const headers = new HttpHeaders()
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${this.jwtService.accessToken}`);
 
     const params = {};
 
@@ -45,7 +50,9 @@ export class FlightService {
   save(entity: Flight): Observable<Flight> {
     let params = new HttpParams();
     let url = '';
-    const headers = new HttpHeaders().set('content-type', 'application/json');
+    const headers = new HttpHeaders()
+      .set('content-type', 'application/json')
+      .set('Authorization', `Bearer ${this.jwtService.accessToken}`);
     if (entity.id) {
       url = `${this.baseUrl}/flights/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());
@@ -59,7 +66,9 @@ export class FlightService {
   delete(entity: Flight): Observable<Flight> {
     let params = new HttpParams();
     let url = '';
-    const headers = new HttpHeaders().set('content-type', 'application/json');
+    const headers = new HttpHeaders()
+      .set('content-type', 'application/json')
+      .set('Authorization', `Bearer ${this.jwtService.accessToken}`);
     if (entity.id) {
       url = `${this.baseUrl}/flights/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());

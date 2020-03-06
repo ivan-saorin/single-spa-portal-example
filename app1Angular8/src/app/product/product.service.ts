@@ -4,19 +4,23 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { JwtService } from '../jwt.service';
 
 @Injectable()
 export class ProductService {
   private baseUrl: string = 'http://localhost:3200';
   productList: Product[] = [];
 
-  constructor(private router: Router, private http: HttpClient) {
+  constructor(private router: Router, private http: HttpClient, private jwtService: JwtService) {
   }
 
   findById(id: string): Observable<Product> {
     const url = `${this.baseUrl}/products/${id}`;
     const params = { 'id': id };
-    const headers = new HttpHeaders().set('Accept', 'application/json');
+    const headers = new HttpHeaders()
+    .set('Accept', 'application/json')
+    .set('Authorization', `Bearer ${this.jwtService.accessToken}`);
+
     return this.http.get<Product>(url, {params, headers});
   }
 
@@ -35,7 +39,10 @@ export class ProductService {
 
   find(filter: ProductFilter): Observable<Product[]> {
     const url = `${this.baseUrl}/products`;
-    const headers = new HttpHeaders().set('Accept', 'application/json');
+    const headers = new HttpHeaders()
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${this.jwtService.accessToken}`);
+
 
     /*
     const params = {
@@ -51,7 +58,10 @@ export class ProductService {
   save(entity: Product): Observable<Product> {
     let params = new HttpParams();
     let url = '';
-    const headers = new HttpHeaders().set('content-type', 'application/json');
+    const headers = new HttpHeaders()
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${this.jwtService.accessToken}`);
+
     if (entity.id) {
       url = `${this.baseUrl}/products/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());
@@ -65,7 +75,10 @@ export class ProductService {
   delete(entity: Product): Observable<Product> {
     let params = new HttpParams();
     let url = '';
-    const headers = new HttpHeaders().set('content-type', 'application/json');
+    const headers = new HttpHeaders()
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${this.jwtService.accessToken}`);
+
     if (entity.id) {
       url = `${this.baseUrl}/products/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());

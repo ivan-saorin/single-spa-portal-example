@@ -9,7 +9,7 @@ providedIn: 'root'
 })
 
 export class JwtService {
-    private accessToken: string = null;
+    private _accessToken: string = null;
 
     constructor(private httpClient: HttpClient, public jwtHelper: JwtHelperService) { }
 
@@ -20,6 +20,10 @@ export class JwtService {
         // true or false
         return !this.jwtHelper.isTokenExpired(token);
     }   
+
+    get accessToken() {
+        return this.accessToken;
+    }
 
     login(userInfo: User) {
         let user: string = userInfo.user;
@@ -45,7 +49,7 @@ export class JwtService {
             res => {
                 console.warn('login < access_token', res.access_token);
                 //localStorage.setItem('access_token', res.access_token);
-                this.accessToken = res.access_token;
+                this._accessToken = res.access_token;
                 return {}; 
             },
             err => console.log(err)
@@ -63,11 +67,11 @@ export class JwtService {
 
     logout() {
         //localStorage.removeItem('access_token');
-        this.accessToken = null;
+        this._accessToken = null;
     }
 
     public get loggedIn(): boolean{
         //return localStorage.getItem('access_token') !==  null;
-        return this.accessToken !== null;
+        return this._accessToken !== null;
     }
 }
