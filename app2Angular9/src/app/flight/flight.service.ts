@@ -7,13 +7,14 @@ import { Router } from '@angular/router';
 
 @Injectable()
 export class FlightService {
+  private baseUrl: string = 'http://localhost:3200';
   flightList: Flight[] = [];
 
   constructor(private router: Router, private http: HttpClient) {
   }
 
   findById(id: string): Observable<Flight> {
-    const url = `http://localhost:3200/flights/${id}`;
+    const url = `${this.baseUrl}/flights/${id}`;
     const params = { 'id': id };
     const headers = new HttpHeaders().set('Accept', 'application/json');
     return this.http.get<Flight>(url, {params, headers});
@@ -33,7 +34,7 @@ export class FlightService {
   }
 
   find(filter: FlightFilter): Observable<Flight[]> {
-    const url = `http://localhost:3200/flights`;
+    const url = `${this.baseUrl}/flights`;
     const headers = new HttpHeaders().set('Accept', 'application/json');
 
     const params = {};
@@ -46,11 +47,11 @@ export class FlightService {
     let url = '';
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://localhost:3200/flights/${entity.id.toString()}`;
+      url = `${this.baseUrl}/flights/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());
       return this.http.put<Flight>(url, entity, {headers, params});
     } else {
-      url = `http://localhost:3200/flights`;
+      url = `${this.baseUrl}/flights`;
       return this.http.post<Flight>(url, entity, {headers, params});
     }
   }
@@ -60,7 +61,7 @@ export class FlightService {
     let url = '';
     const headers = new HttpHeaders().set('content-type', 'application/json');
     if (entity.id) {
-      url = `http://localhost:3200/flights/${entity.id.toString()}`;
+      url = `${this.baseUrl}/flights/${entity.id.toString()}`;
       params = new HttpParams().set('ID', entity.id.toString());
       return this.http.delete<Flight>(url, {headers, params});
     }
