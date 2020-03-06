@@ -22,7 +22,7 @@ export class JwtService {
     }   
 
     get accessToken() {
-        return this.accessToken;
+        return this._accessToken;
     }
 
     login(userInfo: User) {
