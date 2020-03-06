@@ -9,10 +9,13 @@ providedIn: 'root'
 })
 
 export class JwtService {
+    private accessToken: string = null;
+
     constructor(private httpClient: HttpClient, public jwtHelper: JwtHelperService) { }
 
     public isAuthenticated(): boolean {
-        const token = localStorage.getItem('access_token');
+        //const token = localStorage.getItem('access_token');
+        const token = this.accessToken;
         // Check whether the token is expired and return
         // true or false
         return !this.jwtHelper.isTokenExpired(token);
@@ -41,7 +44,8 @@ export class JwtService {
         return this.httpClient.post<{access_token:  string}>('http://localhost:3200/auth/login', body, httpOptions).subscribe(
             res => {
                 console.warn('login < access_token', res.access_token);
-                localStorage.setItem('access_token', res.access_token);
+                //localStorage.setItem('access_token', res.access_token);
+                this.accessToken = res.access_token;
                 return {}; 
             },
             err => console.log(err)
@@ -58,10 +62,12 @@ export class JwtService {
     }
 
     logout() {
-        localStorage.removeItem('access_token');
+        //localStorage.removeItem('access_token');
+        this.accessToken = null;
     }
 
     public get loggedIn(): boolean{
-        return localStorage.getItem('access_token') !==  null;
+        //return localStorage.getItem('access_token') !==  null;
+        return this.accessToken !== null;
     }
 }
