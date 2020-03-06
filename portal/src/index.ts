@@ -3,7 +3,9 @@ import { Routes } from './routes';
 import { Router, RouterMode } from './router';
 import { Navigation } from './Navigation';
 import { UIHandler } from './uiHandler';
-import { Mediator } from './Mediator';
+import { AuthGuard } from './auth/auth.guard';
+import { JwtService } from './auth/jwt.service';
+//import { Mediator } from './Mediator';
 
 
 const routes: Routes = {
@@ -31,25 +33,29 @@ const routes: Routes = {
     },
     "/protected": {
         "internal": {
-            "target": "@self"
+            "target": "@self",
+            "guarded": true
         }
     },
     "/app1Angular8": {
         "external": {
             "url": "http://localhost:4001/",
-            "target": "content"
+            "target": "content",
+            "guarded": true
         }
     },
     "/app2Angular9": {
         "external": {
             "url": "http://localhost:4002/",
-            "target": "content"
+            "target": "content",
+            "guarded": true
         }
     },
     "/app2Angular9/flights": {
         "external": {
             "url": "http://localhost:4002/flights",
-            "target": "content"
+            "target": "content",
+            "guarded": true
         }
     },
     "/app3Vue": {
@@ -66,10 +72,12 @@ const routes: Routes = {
     }
 };
 
-
+let baseUrl = 'http://localhost:3200';
+let jwt = new JwtService(baseUrl);
 let router = new Router(RouterMode.Hash);
+let auth = new AuthGuard(jwt, router);
 let uiHandler = new UIHandler(router, document, routes);
-let navigation = new Navigation(router, routes, uiHandler);
+new Navigation(router, routes, uiHandler, auth);
 uiHandler.init();
 
 /*

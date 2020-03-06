@@ -285,8 +285,10 @@ export class UIHandler {
         this.showElement(uri);
 
         let anchor: HTMLAnchorElement = this.getAnchorForUri(uri);
-        utils.processElementsClass(this.document, '.navLinks a', 'active');
-        anchor.classList.add('active');
+        if (anchor) {
+            utils.processElementsClass(this.document, '.navLinks a', 'active');
+            anchor.classList.add('active');
+        }
     }
 
     public handleRedirectPath = (): void => {
@@ -367,8 +369,11 @@ export class UIHandler {
         }
         uri = uri + id;
         a = this.document.querySelector('a[href="' + uri + '"]');
-        console.log("activate element: ", a);
-        return a;
+        if (a) {
+            console.log("activate element: ", a);
+            return a;
+        }
+        return null;
     }
 
     handleTextMessage(text: string) {

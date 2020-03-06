@@ -1,4 +1,10 @@
 // https://github.com/s22h/router.ts
+
+export interface CanActivate {
+	canActivate(): boolean;
+}
+  
+
 export class Route {
 	public path: string;
 	public callback: CallableFunction;

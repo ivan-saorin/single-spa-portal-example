@@ -11,10 +11,12 @@ export interface Target {
 export interface URITarget {
     url:    string;
     target: string;
+    guarded?: boolean;
 }
 
 export interface InternalTarget {
     default?: boolean;
     target:  string;
+    guarded?: boolean;
 }
 

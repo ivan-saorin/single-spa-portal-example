@@ -1,14 +1,13 @@
 import { Routes, Target } from "./routes";
 import { Router } from './router';
 import { UIHandler } from './uiHandler';
-
+import { AuthGuard } from './auth/auth.guard';
 
 export class Navigation {
-    constructor (private router: Router, public routes: Routes, private uiHandler: UIHandler) {
+    constructor (private router: Router, public routes: Routes, private uiHandler: UIHandler, private auth: AuthGuard) {
         // History mode do not support loading the app throug the direct change of the url in the navigation bar of the browser. Let's use Hash mode instead.
         // this.router = new Router(RouterMode.History);
         this.uiHandler = uiHandler;
-
         
         for (const key in routes) {
             //console.log('key: ', key, routes[key]);
@@ -28,6 +27,17 @@ export class Navigation {
         this.router.run();
     }
 
+    private guardedFx(callback: any) {
+        if (!this.auth.canActivate()) {
+            return this.gotoLogin;
+        }
+        return callback;
+    }
+
+    private gotoLogin = () => {
+        this.router.navigate('/login');
+    }
+
     private addRoute(route: string, target: Target) {        
         let fx = target.redirect ? 
             this.uiHandler.handleRedirectPath : target.internal ? 
@@ -36,6 +46,11 @@ export class Navigation {
         if (fx == null) {
             throw new TypeError('Invalid target value: [' + target + ']');
         }
+
+        fx = (target.internal && target.internal.guarded) ? 
+        this.guardedFx(fx) : (target.external && target.external.guarded) ? 
+            this.guardedFx(fx) : fx;
+
         //console.log('target: ', target);
         this.router.add(route, fx);
         if (fx == this.uiHandler.handleExternalPath ) {
