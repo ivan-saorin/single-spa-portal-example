@@ -29,6 +29,11 @@ const routes: Routes = {
             "target": "@self"
         }
     },
+    "/protected": {
+        "internal": {
+            "target": "@self"
+        }
+    },
     "/app1Angular8": {
         "external": {
             "url": "http://localhost:4001/",
