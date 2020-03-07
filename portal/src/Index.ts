@@ -68,7 +68,8 @@ const routes: Routes = {
     "/app4React": {
         "external": {
             "url": "http://localhost:4004/",
-            "target": "content"
+            "target": "content",
+            "guarded": true
         }
     }
 };

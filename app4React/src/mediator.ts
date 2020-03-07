@@ -1,8 +1,9 @@
 import guest from "./rimless/guest";
 
-interface IFrameLoaded {
-    allowedNavigations: string[],
-    payload: any
+export interface IFrameLoaded {
+  allowedNavigations: string[],
+  accessToken?: string,
+  payload: any
 }
 
 export class Mediator {
@@ -45,7 +46,7 @@ export class Mediator {
       await this.connection.remote.textMessage(window.origin, 'text', message).catch((err: any) => { console.error(err); });
   }
 
-  public async frameLoaded(origin: string, id: string) {
+  public async frameLoaded(origin: string, id: string): Promise<IFrameLoaded> {
       // call remote procedures on host
       console.log(`[GUEST] calling HOST.frameLoaded [${origin}] [${id}]`);
       const res = await this.connection.remote.frameLoaded(window.origin, 'frameLoaded', origin, id).catch((err: any) => { console.error(err); });
@@ -53,7 +54,9 @@ export class Mediator {
       let response = res as IFrameLoaded;
       this.home.setState( {navs: response.allowedNavigations} );
       console.log('[GUEST] allowed navigations', response.allowedNavigations);
+      console.log('[GUEST] accessToken', response.accessToken);
       console.log('[GUEST] received payload', response.payload);
+      return res;
   }
 
   public async navigate(url: string, payload: any) {

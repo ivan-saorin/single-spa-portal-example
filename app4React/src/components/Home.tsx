@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link, RouteComponentProps } from 'react-router-dom';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { Mediator } from '../mediator';
 
 
@@ -29,11 +29,23 @@ export default class Home extends React.Component<RouteComponentProps, IState> {
         //let href = window.location.href;
         let pathname = window.location.pathname;
         console.log('window.location: ', window.location.href);
-        await mediator.frameLoaded(window.origin, pathname);
-
-        axios.get(`http://localhost:3200/customers`).then(data => {
-            this.setState({ customers: data.data })
-        })
+        let res = await mediator.frameLoaded(window.origin, pathname);
+        if (res.accessToken) {
+            let config: AxiosRequestConfig = {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${res.accessToken}` 
+                }
+            }
+            axios.get(`http://localhost:3200/customers`, config).then(data => {
+                this.setState({ customers: data.data })
+            })
+        }
+        else {
+            axios.get(`http://localhost:3200/customers`).then(data => {
+                this.setState({ customers: data.data })
+            })
+        }
     }
 
     public componentWillUnmount() {
