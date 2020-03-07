@@ -70,10 +70,10 @@
                     <br />
                     <form class="login100-form validate-form" id="loginForm" name="loginForm"></form>
                     <div id="login-box-name" style="margin-top:20px;">User:</div>
-                    <div id="login-box-field" style="margin-top:20px;"><input name="user" class="form-login"
+                    <div id="login-box-field" style="margin-top:20px;"><input id="name" name="user" class="form-login"
                             title="User" value="" size="30" maxlength="2048" /></div>
                     <div id="login-box-name">Password:</div>
-                    <div id="login-box-field"><input name="password" type="password" class="form-login" title="Password"
+                    <div id="login-box-field"><input id="password" name="password" type="password" class="form-login" title="Password"
                             value="" size="30" maxlength="2048" /></div>
                     <br />
                     <!--span class="login-box-options"><input type="checkbox" name="1" value="1"> Remember Me <a href="#"
@@ -91,11 +91,11 @@
                 <h1>Contact Page</h1>
             </section>
         </contact>
-        <contact class="portal-page">
+        <protected class="portal-page">
             <section>
                 <h1>Protected Page</h1>
             </section>
-        </contact>
+        </protected>
     </div>
     <script src="<%= htmlWebpackPlugin.files.chunks.main.entry %>" async defer></script>
 </body>

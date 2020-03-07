@@ -4,6 +4,8 @@ import { Routes } from './Routes';
 import * as url from 'url';
 import { Mediator } from './Mediator';
 import { ModuleHandler } from './moduleHandler';
+import { JwtService } from './auth/JWTService';
+import { AuthGuard } from './auth/AuthGuard';
 
 export class UIHandler {
     private errorTimeoutValue: number = 7000;
@@ -12,8 +14,9 @@ export class UIHandler {
     private target: HTMLElement;
     private host: Mediator;
     private activeModule: ModuleHandler = null;
+    private wereHeadingTo: string = null;
 
-    constructor(private router: Router, private document: Document, private routes: Routes) {
+    constructor(private router: Router, private document: Document, private routes: Routes, private jwt: JwtService, private guard: AuthGuard) {
         this.document = document;
         this.router = router;
         this.host = new Mediator(this);
@@ -226,8 +229,19 @@ export class UIHandler {
         this.navigate(path);
     }
 
+    public completePreviousNavigation() {
+        if (this.wereHeadingTo)
+            this.router.navigate(this.wereHeadingTo);
+    }
+
     public handleExternalPath = (): void => {
         let path = this.router ? this.router.getCurrentPath() : "";
+        if (this.guard && this.guard.isProtected(path)) {
+            this.wereHeadingTo = path;
+            if (!this.guard.canActivate())
+                return;
+        }        
+
         console.log('URL changed to external path: %s', path);
 
         const iframe = <HTMLIFrameElement>this.document.getElementById('mfc');
@@ -284,20 +298,29 @@ export class UIHandler {
         switch (selector) {
             case 'home': module = await import('./NoopHandler'); break;
             case 'contact': module = await import('./NoopHandler'); break;
+            case 'protected': module = await import('./NoopHandler'); break;
             case 'login': module = await import('./LoginHandler'); break;
 
             default: throw Error(`Unknown value as selector: [${selector}].`);
         }
         console.log('moduleFactory ', module);
-        return new module.default();
+        //return new module.default();
+        //uiHandler: UIHandler, router: Router, document: Document, routes: Routes, private jwt: JwtService
+        return new module.default(this, this.router, this.document, this.routes, this.jwt);
     }
 
     public handleInternalPath = (): void => {
-        if (this.activeModule) {
-            this.activeModule.mount();
-        }
-
+        
         let path = this.router ? this.router.getCurrentPath() : "";
+        if (this.guard && this.guard.isProtected(path)) {
+            this.wereHeadingTo = path;
+            if (!this.guard.canActivate())
+                return;
+        }        
+
+        if (this.activeModule) {
+            this.activeModule.unmount();
+        }
         console.log('URL changed to internal path: %s', path);
         this.hidePages('portal-page');
         let uri = path.substring(1);
@@ -412,13 +435,19 @@ export class UIHandler {
         this.messageTimeout = setTimeout(this.hideMessage, 4000);
     }
 
-    handleFrameLoaded(origin: string, id: string) {
+    handleFrameLoaded(origin: string, id: string): string {
         let uri = this.getUriOfOrigin(origin, id);
         let anchor: HTMLAnchorElement = this.getAnchorForUri(uri, id);
         utils.processElementsClass(this.document, '.navLinks a', 'active');
         if (anchor) {
             anchor.classList.add('active');
             this.target = anchor;
+        }
+        if (this.guard.isProtected(uri)) {
+            return this.jwt.accessToken;
+        }
+        else {
+            return null;
         }
     }
 

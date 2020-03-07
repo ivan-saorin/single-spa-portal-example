@@ -1,8 +1,10 @@
 import { host }  from "./rimless";
 import UIHandler from "./UIHandler";
 
+
 interface IFrameLoaded {
     allowedNavigations: string[],
+    accessToken?: string,
     payload: any
 }
 
@@ -17,11 +19,18 @@ export class Mediator {
         this.connection = await host.connect(iframe, {
             log: (...values: any[]) => console.log('[HOST]', ...values),
             frameLoaded: (sender: string, notification: string, origin: string, id: string): IFrameLoaded => {
-                this.uiHandler.handleFrameLoaded(sender, id);
-                return {
-                    allowedNavigations: this.uiHandler.getAllowedNavigations(),
-                    payload: this.payload
-                };
+                let accessToken = this.uiHandler.handleFrameLoaded(sender, id);
+                if (accessToken) 
+                    return {                    
+                        allowedNavigations: this.uiHandler.getAllowedNavigations(),
+                        accessToken: accessToken,
+                        payload: this.payload
+                    };                
+                else
+                    return {                    
+                        allowedNavigations: this.uiHandler.getAllowedNavigations(),
+                        payload: this.payload
+                    };
             },
             navigate: (url: string, payload?: any) => {
                 this.payload = payload || {};

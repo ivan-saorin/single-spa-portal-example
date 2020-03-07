@@ -9,7 +9,7 @@ import { JwtService } from './auth/JWTService';
 //import { Mediator } from './Mediator';
 
 
-const routes: Routes = {
+const routes: Routes = {    
     "/": {
         "redirect": {
             "url": "/home",
@@ -75,9 +75,10 @@ const routes: Routes = {
 
 let baseUrl = 'http://localhost:3200';
 let jwt = new JwtService(baseUrl);
+// History mode do not support loading the app throug the direct change of the url in the navigation bar of the browser. Let's use Hash mode instead.
 let router = new Router(RouterMode.Hash);
-let auth = new AuthGuard(jwt, router);
-let uiHandler = new UIHandler(router, document, routes);
+let auth = new AuthGuard(jwt, router, routes);
+let uiHandler = new UIHandler(router, document, routes, jwt, auth);
 new Navigation(router, routes, uiHandler, auth);
 uiHandler.init();
 

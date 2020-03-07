@@ -61,6 +61,7 @@ export class Router extends EventTarget {
 	}
 
 	navigate(path: string): void {
+		console.warn('router navigate: ', path);
 		if (this.mode == RouterMode.History) {
 			window.history.pushState(null, "", this.normalizePath(`${this.options.root}/${path}`));
 		} else if (this.mode == RouterMode.Hash) {
