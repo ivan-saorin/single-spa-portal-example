@@ -59,3 +59,8 @@ export function makeid(length: number) {
     }
     return result;
  }
+
+ export function upperCaseFirst(str: string): string {
+    let s = str.substring(0,1).toUpperCase();
+    return s + str.substring(1);
+ }

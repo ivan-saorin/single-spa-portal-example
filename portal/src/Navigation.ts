@@ -1,7 +1,7 @@
-import { Routes, Target } from "./routes";
-import { Router } from './router';
-import { UIHandler } from './uiHandler';
-import { AuthGuard } from './auth/auth.guard';
+import { Routes, Target } from "./Routes";
+import { Router } from './Router';
+import { UIHandler } from './UIHandler';
+import { AuthGuard } from './auth/AuthGuard';
 
 export class Navigation {
     constructor (private router: Router, public routes: Routes, private uiHandler: UIHandler, private auth: AuthGuard) {

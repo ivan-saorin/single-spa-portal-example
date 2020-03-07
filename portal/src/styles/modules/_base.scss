@@ -1,8 +1,3 @@
-*,
-*:before,
-*:after {
-  box-sizing: inherit;
-}
 
 *, html {
   box-sizing: border-box;
@@ -135,7 +130,7 @@ loading.hide {
   padding: 30px 60px;
 }
 
-.portal-page::before {
+.portal-page section {
   position: absolute;
   border: 10px solid #dadada;
   z-index: 98;
