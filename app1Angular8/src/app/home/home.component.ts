@@ -1,6 +1,7 @@
-import {Component, OnInit, ViewEncapsulation} from '@angular/core';
-import {Router, ActivatedRoute} from '@angular/router';
+import { Component, Input, EventEmitter, ViewEncapsulation, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { JwtService } from '../jwt.service';
+import { MediatorService } from '../mediator.service';
 
 @Component({
   selector: 'app-home',
@@ -10,10 +11,13 @@ import { JwtService } from '../jwt.service';
 })
 export class HomeComponent implements OnInit {
   needsLogin: boolean = false;
+  @Input() refresh = new EventEmitter<any>();
 
   constructor(
+    private mediator: MediatorService,
     private router: Router,
     private jwtService: JwtService) {
+      mediator.setRefresh(this.refresh);
   }
 
 
@@ -21,6 +25,10 @@ export class HomeComponent implements OnInit {
     console.log('ngOnInit');
     this.needsLogin = !this.jwtService.isAuthenticated();
     console.log('needsLogin', this.needsLogin);
+    this.refresh.subscribe((event) => {
+      console.log(event);
+      this.needsLogin = !this.jwtService.isAuthenticated();
+    });
   }
 
   login(): void {

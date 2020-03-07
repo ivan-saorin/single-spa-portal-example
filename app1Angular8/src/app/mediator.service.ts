@@ -1,8 +1,10 @@
 import guest from "./rimless/guest";
 import { Injectable, EventEmitter } from '@angular/core';
+import { JwtService } from './jwt.service';
 
 interface IFrameLoaded {
   allowedNavigations: string[],
+  accessToken?: string,
   payload: any
 }
 
@@ -13,9 +15,14 @@ export class MediatorService {
   private connection: any = null;
   private receive: EventEmitter<any>;
   private allowedNavs: EventEmitter<any>;
+  private refresh: EventEmitter<any>;
 
-  constructor() {
+  constructor(private jwt: JwtService) {
 
+  }
+
+  setRefresh(refresh: EventEmitter<any>) {
+    this.refresh = refresh;
   }
 
   setReceiver(receiver: EventEmitter<any>) {
@@ -62,7 +69,13 @@ export class MediatorService {
       if (res) {
         let response = <IFrameLoaded> res;
         this.allowedNavs.emit(response.allowedNavigations);
+        if (response.accessToken) {
+          this.jwt.accessToken = response.accessToken;
+          this.refresh.emit({});
+        }
+
         console.log('[GUEST] allowed navigations', response.allowedNavigations);
+        console.log('[GUEST] accessToken', response.accessToken);
         console.log('[GUEST] received payload', response.payload);
       }
   }

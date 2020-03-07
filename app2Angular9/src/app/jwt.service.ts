@@ -25,6 +25,10 @@ export class JwtService {
         return this._accessToken;
     }
 
+    set accessToken(accessToken: string) {
+        this._accessToken = accessToken;
+    }
+
     login(userInfo: User) {
         let user: string = userInfo.user;
         let p: string= userInfo.password;
