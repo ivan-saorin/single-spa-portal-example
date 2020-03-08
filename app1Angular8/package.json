@@ -7,7 +7,8 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "depcruiser:start": "node ./node_modules/dependency-cruiser/bin/dependency-cruise.js --include-only \"^src\" --output-type dot src | dot -T svg > dependency-graph.svg"
   },
   "repository": {
     "type": "git",
@@ -46,6 +47,7 @@
     "@types/node": "~12.12.11",
     "angular-crud": "1.0.0",
     "codelyzer": "~5.2.0",
+    "dependency-cruiser": "^8.0.1",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~4.4.1",

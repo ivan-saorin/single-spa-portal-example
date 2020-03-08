@@ -15,7 +15,7 @@ This example stretch the idea of micro-frontends for Single Page Application and
    - `npm install`
    - `npm start`
 3. Then start the portal with:
-   - `cd portal2`
+   - `cd portal`
    - `npm install`
    - `npm start`
 4. Open up http://localhost:8080 in a web browser.
@@ -23,6 +23,15 @@ This example stretch the idea of micro-frontends for Single Page Application and
 ## How to update all npm dependencies
 
 [Follow this instructions](https://flaviocopes.com/update-npm-dependencies/)
+
+## How to visualize projects dependencies
+
+1. Install [GraphWiz](https://graphviz.gitlab.io/_pages/Download/Download_windows.html)
+1. Set the path environment variable to the installation path (e.g. `C:\Program Files (x86)\Graphviz2.38\bin`)
+1. To install dependency-cruiser run `npm i` in all the subfolders (portal, app1Angular8, app2Angular9, app3Vue, app4React) 
+1. To run dependency-cruiser run in the main forlder: `npm run depcruiser:start` 
+
+The result will be a 'dependency-graph.svg' file included in each sub project.
 
 ## inter-app-communication (To be done)
 This topic has been discussed multiple times (i.e. [here](https://github.com/CanopyTax/single-spa/issues/112) or [here](https://github.com/CanopyTax/single-spa/issues/107)). There may be many solutions to solve this problem. In this repository I want you to show a solution that meets the following requirements:

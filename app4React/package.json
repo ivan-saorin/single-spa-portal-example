@@ -21,11 +21,15 @@
     "lodash.set": "^4.3.2",
     "short-uuid": "^3.1.1"
   },
+  "devDependencies": {
+    "dependency-cruiser": "^8.0.1"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "depcruiser:start": "node ./node_modules/dependency-cruiser/bin/dependency-cruise.js --include-only \"^src\" --output-type dot src | dot -T svg > dependency-graph.svg"
   },
   "eslintConfig": {
     "extends": "react-app"
