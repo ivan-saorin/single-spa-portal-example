@@ -39,7 +39,8 @@ export class Mediator {
   public async textMessage(message: string) {
       // call remote procedures on host
       console.log('[GUEST] calling HOST.textMessage');
-      const res = await this.connection.remote.textMessage(window.origin, 'text', message).catch((err: any) => { console.error(err); });
+      await this.connection.remote.textMessage(window.origin, 'text', message).catch((err: any) => { console.error(err); });
+      //const res = await this.connection.remote.textMessage(window.origin, 'text', message).catch((err: any) => { console.error(err); });
       //console.log('[GUEST]', res);   
   }
 
@@ -61,7 +62,8 @@ export class Mediator {
     else {
       payload.origin = window.origin;
     }
-    const res = await this.connection.remote.navigate(url, payload).catch((err: any) => { console.error(err); });
+    await this.connection.remote.navigate(url, payload).catch((err: any) => { console.error(err); });
+    //const res = await this.connection.remote.navigate(url, payload).catch((err: any) => { console.error(err); });
   }
 
 }

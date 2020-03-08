@@ -64,7 +64,7 @@ export class FlightService {
   }
 
   delete(entity: Flight): Observable<Flight> {
-    let params = new HttpParams();
+    let params: HttpParams;
     let url = '';
     const headers = new HttpHeaders()
       .set('content-type', 'application/json')

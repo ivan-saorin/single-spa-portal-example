@@ -53,17 +53,17 @@ fs.readFile("./users.json", (err, data) => {
       const message = err
       res.status(status).json({status, message})
       return
-    };
+    }
 
     // Get current users data
-    var data = JSON.parse(data.toString());
+    data = JSON.parse(data.toString());
 
     // Get the id of last user
     var last_item_id = data.users[data.users.length-1].id;
 
     //Add new user
     data.users.push({id: last_item_id + 1, user: user, password: password}); //add some data
-    var writeData = fs.writeFile("./users.json", JSON.stringify(data), (err, result) => {  // WRITE
+    fs.writeFile("./users.json", JSON.stringify(data), (err, result) => {  // WRITE
         if (err) {
           const status = 401
           const message = err

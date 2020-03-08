@@ -52,7 +52,7 @@ export class Router extends EventTarget {
 	remove(path: string): boolean {
 		for (let i = 0; i < this.routes.length; ++i) {
 			if (this.routes[i].path == this.normalizePath(path)) {
-				this.routes.slice(i, 1);
+				this.routes = this.routes.slice(i, 1);
 				return true;
 			}
 		}

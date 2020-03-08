@@ -9,11 +9,11 @@ export abstract class ModuleHandler {
     }
 
     protected getSelectorEl(): HTMLElement {
-        let el: HTMLElement = <HTMLElement>document.querySelector(this.selector);
+        let el: HTMLElement = document.querySelector(this.selector);
         if (!el) {
             throw new EvalError(`Invalid selector: ${this.selector}`);
         }
-        return <HTMLElement>document.querySelector(this.selector);
+        return document.querySelector(this.selector);
     }
 
     public mount(): void {

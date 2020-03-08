@@ -46,7 +46,7 @@ export class Mediator {
                 function  callbackFail() {
                     ++faileds;
                     checkFinished();
-                };
+                }
     
                 for (var i = 0, len = subscribers.length; i < len; i++) {
                     let subscriber = subscribers[i];

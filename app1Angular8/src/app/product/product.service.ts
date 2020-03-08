@@ -73,7 +73,7 @@ export class ProductService {
   }
 
   delete(entity: Product): Observable<Product> {
-    let params = new HttpParams();
+    let params: HttpParams;
     let url = '';
     const headers = new HttpHeaders()
       .set('Accept', 'application/json')
