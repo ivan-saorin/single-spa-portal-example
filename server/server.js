@@ -50,21 +50,21 @@ The jti (JWT ID) claim provides a unique identifier for the JWT. The identifier 
 */
   let adminGroups = ['guest', 'admin'];
   let guestGroups = ['guest'];
-
-  payload.iss = 'example.com';
-  payload.sub = 'portal';
-  payload.aud = ['app1Angular8', 'app2Angular9', 'app4React'];
-  payload.exp = Math.floor(Date.now() / 1000) + (60 * 60); // 1h
-  payload.nbf = Math.floor(Date.now() / 1000) - 10; // now - 10 sec to account for server client timing misallignment
-  payload.iat = Math.floor(Date.now() / 1000);
-  payload.jti = makeid(10);
+  let newPayload = {};
+  newPayload.iss = 'example.com/portal';
+  newPayload.sub = payload.user;
+  newPayload.aud = ['app1Angular8', 'app2Angular9', 'app4React'];
+  newPayload.exp = Math.floor(Date.now() / 1000) + (60 * 60); // 1h
+  newPayload.nbf = Math.floor(Date.now() / 1000) - 10; // now - 10 sec to account for server client timing misallignment
+  newPayload.iat = Math.floor(Date.now() / 1000);
+  newPayload.jti = makeid(10);
   if (payload.user == 'admin') {
-    payload.groups = adminGroups;
+    newPayload.groups = adminGroups;
   }
   else {
-    payload.groups = guestGroups;
+    newPayload.groups = guestGroups;
   }
-  return jwt.sign(payload, SECRET_KEY);
+  return jwt.sign(newPayload, SECRET_KEY);
 }
 
 // Verify the token 
