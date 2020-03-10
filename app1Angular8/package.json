@@ -25,6 +25,7 @@
     "@angular/platform-browser-dynamic": "^8.2.14",
     "@angular/router": "^8.2.14",
     "@auth0/angular-jwt": "^4.0.0",
+    "@types/jwt-decode": "^2.2.1",
     "@types/lodash.get": "^4.4.6",
     "@types/lodash.set": "^4.3.6",
     "canvas": "^2.5.0",

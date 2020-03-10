@@ -258,19 +258,17 @@ export class UIHandler {
         // => URL changed to /foo/bar
     }
 
-    private workOutElement(name: string, class1: string, class2: string) {
-        let element = this.document.getElementsByTagName(name.toUpperCase())[0];
-        utils.removeClass(element, class1);
-        utils.addClass(element, class2);
-
-    }
-    
     private showElement(name: string) {
-        this.workOutElement(name, 'hide', 'show');
+        let element = this.document.getElementsByTagName(name.toUpperCase())[0];
+        utils.removeClass(element, 'hide');
+        utils.addClass(element, 'show');
+
     }
 
     private hideElement(name: string) {
-        this.workOutElement(name, 'show', 'hide');
+        let element = this.document.getElementsByTagName(name.toUpperCase())[0];
+        utils.removeClass(element, 'show');
+        utils.addClass(element, 'hide');
     }
 
     private hideMessage = () => {
@@ -283,7 +281,7 @@ export class UIHandler {
         let contentEl = this.getContentEl();
         utils.removeClass(contentEl, 'show');
         utils.addClass(contentEl, 'hide');
-        //let messageEl = this.getMessageEl();
+        let messageEl = this.getMessageEl();
         utils.removeClass(contentEl, 'show');
         utils.addClass(contentEl, 'hide');
     }
@@ -335,7 +333,7 @@ export class UIHandler {
         if (anchor) {            
             utils.processElementsClass(this.document, '.navLinks a', 'active');
             anchor.classList.add('active');
-        }
+        };
     }
 
     public handleRedirectPath = (): void => {

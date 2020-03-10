@@ -28,6 +28,8 @@ export class HomeComponent implements OnInit {
     this.refresh.subscribe((event) => {
       console.log(event);
       this.needsLogin = !this.jwtService.isAuthenticated();
+      let dto = this.jwtService.decode();
+      console.log('token dto: ', dto);  
     });
   }
 

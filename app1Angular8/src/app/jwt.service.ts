@@ -2,7 +2,19 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import JwtDecode from 'jwt-decode';
 import { User } from './login/models';
+
+interface TokenDto {
+    iss: string;
+    sub: string
+    aud: string[];
+    exp: number;
+    nbf: number;
+    iat: number;
+    jti: string;
+    groups: string[];
+}
 
 @Injectable({
 providedIn: 'root'
@@ -21,6 +33,10 @@ export class JwtService {
         return !this.jwtHelper.isTokenExpired(token);
     }   
 
+    public decode(): TokenDto {
+        const token = this.accessToken;
+        return JwtDecode(token) as TokenDto;
+    }
     get accessToken() {
         return this._accessToken;
     }
