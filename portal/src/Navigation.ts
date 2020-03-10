@@ -14,17 +14,6 @@ export class Navigation {
         this.router.run();
     }
 
-    private guardedFx(callback: any) {
-        if (!this.auth.canActivate()) {
-            return this.gotoLogin();
-        }
-        return callback;
-    }
-
-    private gotoLogin() {
-        this.router.navigate('/login');
-    }
-
     private addRoute(route: string, target: Target) {        
         let fx = target.redirect ? 
             this.uiHandler.handleRedirectPath : target.internal ? 
@@ -33,12 +22,6 @@ export class Navigation {
         if (fx == null) {
             throw new TypeError('Invalid target value: [' + target + ']');
         }
-
-        /*
-        fx = (target.internal && target.internal.guarded) ? 
-        this.guardedFx(fx) : (target.external && target.external.guarded) ? 
-            this.guardedFx(fx) : fx;
-        */
 
         //console.log('addind route: ', route, target);
         this.router.add(route, fx);

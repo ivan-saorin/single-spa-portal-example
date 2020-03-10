@@ -91,13 +91,6 @@ export class UIHandler {
         return <HTMLIFrameElement>document.getElementsByTagName('IFRAME')[0];
     }
 
-    /*
-    private getIFrameWindow(): Window {
-        let iFrame = this.getIFrameEl();
-        return iFrame.contentWindow;
-    }
-    */
-
     private getIFrameSrc() {
         let iFrame = this.getIFrameEl();
         return iFrame.src;
