@@ -74,9 +74,6 @@ function verifyToken(token){
 
 // Check if the user exists in database
 function isAuthenticated({user, password}){
-  console.log(user);
-  console.log(password);
-  console.log(userdb.users);
   return userdb.users.findIndex(u => u.user === user && u.password === password) !== -1
 }
 
@@ -130,8 +127,6 @@ server.post('/auth/login', (req, res) => {
   console.log("login endpoint called; request body:");
   console.log(req.body);
   const {user, password} = req.body;
-  console.log('user', user);
-  console.log('pwd', password);
   if (isAuthenticated({user, password}) === false) {
     const status = 401
     const message = 'Incorrect user or password'

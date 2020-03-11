@@ -12,6 +12,7 @@ import { MediatorService } from '../mediator.service';
 export class HomeComponent implements OnInit {
   needsLogin: boolean = false;
   @Input() refresh = new EventEmitter<any>();
+  subject: string = '';
 
   constructor(
     private mediator: MediatorService,
@@ -27,6 +28,16 @@ export class HomeComponent implements OnInit {
     this.refresh.subscribe((event) => {
       console.log(event);
       this.needsLogin = !this.jwtService.isAuthenticated();
+      let dto = this.jwtService.decode();
+      console.log('token dto: ', dto);
+      if ((dto.iss == 'example.com/portal') && (dto.aud.indexOf('app2Angular9') > -1)) {
+        let roles: string = '';
+        dto.groups.forEach((group) => roles += group + ', ');
+        if (roles.length > 0) {
+          roles = roles.substring(0, roles.length - 2);
+        }
+        this.subject = `${dto.sub} as [${roles}]`;
+      }
     });
   }
 
