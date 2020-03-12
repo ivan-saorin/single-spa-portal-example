@@ -32,7 +32,7 @@ export default class LoginHandler extends ModuleHandler{
 
     private submit() {
         console.log('login form submit');
-        let userEl = document.getElementById('name') as HTMLInputElement;
+        let userEl = document.getElementById('user') as HTMLInputElement;
         let passwordEl = document.getElementById('password') as HTMLInputElement;
         let userInfo: User = {
             user: userEl.value,
@@ -42,6 +42,9 @@ export default class LoginHandler extends ModuleHandler{
             userEl.value = '';
             passwordEl.value = '';
             this.uiHandler.completePreviousNavigation();    
+        }, (rejection) => {
+            userEl.value = '';
+            passwordEl.value = '';
         });
     }
 

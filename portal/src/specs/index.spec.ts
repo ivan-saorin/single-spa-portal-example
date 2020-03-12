@@ -63,32 +63,39 @@ describe(`Executing tests with [${driverName}] Selenium driver.`, () => {
       // add new test cases here
     `('navigate to $to',
       async ({ to, expected1, expected2, expected3 } ) => {
-        const expected = `${rootURL}/#/${to}`;
-        await driver.get(expected);
-        let pageLoaded = await helpers.waitPageLoad(driver);
-        expect(pageLoaded).toBeTruthy();    
-        const actual = await driver.getCurrentUrl();
-        expect(actual).toEqual(expected);
-        let element = await helpers.querySelector(`${to}[class^="portal-page show"]`, driver)
-        element = await helpers.waitElementVisible(element, driver)
-        expect(element).toBeTruthy();
-        const elements = await helpers.querySelectorsAll('*[class^="hide"]', driver)
-        expect(elements).toBeTruthy();
-        expect(elements.length).toBeGreaterThanOrEqual(3);
-        let names = await helpers.getTagNameAndClasses(elements);
-        expect(names).toContainEqual('loading.hide')
-        expect(names).toContainEqual('error.hide')
-        expect(names).toContainEqual('content.hide')
-        const elements2 = await helpers.querySelectorsAll('*[class^="portal-page hide"]', driver)
-        expect(elements2).toBeTruthy();
-        expect(elements2.length).toBeGreaterThanOrEqual(3);
-        let names2 = await helpers.getTagNameAndClasses(elements2);
-        expect(names2).toContainEqual(`${expected1}.portal-page.hide`)
-        expect(names2).toContainEqual(`${expected2}.portal-page.hide`)
-        expect(names2).toContainEqual(`${expected3}.portal-page.hide`)
+        await verify(driver, true, to, null, expected1, expected2, expected3);
     })
   })
-  
+
+  describe('Navigation to Protected Portal Pages without JWT Token', () => {
+    test.each`
+      to             | route          | expected1      | expected2      | expected3
+      ${'protected'} | ${'login'}     | ${'protected'} | ${'contact'}   | ${'home'}
+      // add new test cases here
+    `('navigate to $to',
+      async ({ to, route, expected1, expected2, expected3 } ) => {
+        await verify(driver, true, to, route, expected1, expected2, expected3);
+    })
+  })
+
+  describe('Navigation to Protected Portal Pages with JWT Token', () => {
+    test('Do login', async () => {
+      await verify(driver, true, 'protected', 'login', 'protected', 'contact', 'home');
+      await doLogin(driver, 'admin', 'demo');
+      await verify(driver, false, 'protected', 'protected', 'login', 'contact', 'home');
+    })
+
+    test.each`
+      to             | route          | expected1      | expected2      | expected3
+      ${'home'}      | ${null}        | ${'login'}     | ${'protected'} | ${'contact'}
+      ${'protected'} | ${'protected'} | ${'login'}     | ${'contact'}   | ${'home'}
+      // add new test cases here
+    `('navigate to $to',
+      async ({ to, route, expected1, expected2, expected3 } ) => {
+        await verify(driver, true, to, route, expected1, expected2, expected3);
+    })
+  })
+
 /*
 describe('currencyFormatter', () => {
   test.each`
@@ -136,3 +143,43 @@ describe('currencyFormatter', () => {
   });
 
 });
+
+async function doLogin(driver: WebDriver, username: string, password: string) {
+  const userInput = await helpers.querySelector('#user', driver)
+  const passwordInput = await helpers.querySelector('#password', driver)
+  const anchor = await helpers.querySelector('#submit', driver)
+  await userInput.sendKeys(username)
+  await passwordInput.sendKeys(password)
+  await anchor.click();
+}
+
+async function verify(driver: WebDriver, navigate: boolean, to: string, route: string, expected1: string, expected2: string, expected3: string) {
+  let routing = to;
+  if (route) {
+    routing = route;
+  }
+  const current = `${rootURL}/#/${to}`;
+  const expected = `${rootURL}/#/${routing}`;
+  await driver.get(current);
+  let pageLoaded = await helpers.waitPageLoad(driver);
+  expect(pageLoaded).toBeTruthy();
+  const actual = await driver.getCurrentUrl();
+  expect(actual).toEqual(expected);
+  let element = await helpers.querySelector(`${routing}[class^="portal-page show"]`, driver);
+  element = await helpers.waitElementVisible(element, driver);
+  expect(element).toBeTruthy();
+  const elements = await helpers.querySelectorsAll('*[class^="hide"]', driver);
+  expect(elements).toBeTruthy();
+  expect(elements.length).toBeGreaterThanOrEqual(3);
+  let names = await helpers.getTagNameAndClasses(elements);
+  expect(names).toContainEqual('loading.hide');
+  expect(names).toContainEqual('error.hide');
+  expect(names).toContainEqual('content.hide');
+  const elements2 = await helpers.querySelectorsAll('*[class^="portal-page hide"]', driver);
+  expect(elements2).toBeTruthy();
+  expect(elements2.length).toBeGreaterThanOrEqual(3);
+  let names2 = await helpers.getTagNameAndClasses(elements2);
+  expect(names2).toContainEqual(`${expected1}.portal-page.hide`);
+  expect(names2).toContainEqual(`${expected2}.portal-page.hide`);
+  expect(names2).toContainEqual(`${expected3}.portal-page.hide`);
+}
