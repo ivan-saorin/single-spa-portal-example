@@ -64,6 +64,40 @@ describe(`Executing tests with [${driverName}] Selenium driver.`, () => {
     1: contact.portal-page.hide
     2: protected.portal-page.hide
     */
+
+/*
+describe('currencyFormatter', () => {
+  test.each`
+    input     | expectedResult
+    ${'abc'}  | ${undefined}
+    ${1.59}   | ${'£1.59'}
+    ${1.599}  | ${'£1.60'}
+    ${1599}   | ${'£1,599.00'}
+    // add new test cases here
+  `('converts $input to $expectedResult', ({ input, expectedResult }) => {
+    expect(currencyFormatter(input)).toBe(expectedResult)
+  })
+})
+
+import currencyFormatter from 'utils/currencyFormatter'
+
+describe('currencyFormatter', () => {
+  test.each`
+    input    | configObject | expectedResult | configDescription
+    ${'abc'} | ${undefined} | ${undefined}   | ${'none'}
+    ${5.1}   | ${undefined} | ${'£5.10'}     | ${'none'}
+    ${5.189} | ${undefined} | ${'£5.19'}     | ${'none'}
+    ${5}     | ${{dec: 0}}  | ${'£5'}        | ${'dec: 0'}
+    ${5.01}  | ${{dec: 0}}  | ${'£5'}        | ${'dec: 0'}
+    // add new test cases here
+  `('converts $input to $expectedResult with config: $configDescription',
+    ({ input, configObject, expectedResult} ) => {
+      expect(currencyFormatter(input, configObject)).toBe(expectedResult)
+    }
+  )
+})
+*/
+
   });
 
 
