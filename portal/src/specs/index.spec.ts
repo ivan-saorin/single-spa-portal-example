@@ -25,14 +25,16 @@ describe(`Executing tests with [${driverName}] Selenium driver.`, () => {
   });
 
   test('Title should be Portal', async () => {
-    const actual = await driver.getTitle();
+    let pageLoaded = await helpers.waitPageLoad(driver);
+    expect(pageLoaded).toBeTruthy();
+    let actual = await driver.getTitle();
     const expected = 'Portal';
     expect(actual).toEqual(expected);
   });
 
   test('Redirection from "/" to "/home" worked correctly', async () => {
       const actual = await driver.getCurrentUrl();
-      const expected = 'http://localhost:8080/#/home';
+      const expected = `http://localhost:8080/#/home`;
       expect(actual).toEqual(expected);
       let element = await helpers.querySelector('home[class^="portal-page show"]', driver)
       element = await helpers.waitElementVisible(element, driver)

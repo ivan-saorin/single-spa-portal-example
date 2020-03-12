@@ -2,6 +2,14 @@ import { By, until, WebDriver, WebElement } from 'selenium-webdriver';
 
 const waitUntilTime = 20000
 
+export async function waitPageLoad(driver: WebDriver): Promise<boolean> {
+  return await driver.wait(function() {
+    return driver.executeScript('return document.readyState').then(function(readyState) {
+      return readyState === 'complete';
+    });
+  });
+}
+
 export async function querySelector(selector: string, driver: WebDriver) {
   const el = await driver.wait(
     until.elementLocated(By.css(selector)),
@@ -22,7 +30,7 @@ export async function querySelectorsAll(selector: string, driver: WebDriver): Pr
   return els;
 }
 
-export async function waitElementsVisible(elements: WebElement[], driver: WebDriver, waitVisible?: boolean): Promise<WebElement[]> {
+export async function waitElementsVisible(elements: WebElement[], driver: WebDriver): Promise<WebElement[]> {
   let res: Promise<WebElement>[] = [];
   elements.forEach((el) => {
     res.push(driver.wait(until.elementIsVisible(el), waitUntilTime));
