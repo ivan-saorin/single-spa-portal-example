@@ -53,20 +53,42 @@ describe(`Executing tests with [${driverName}] Selenium driver.`, () => {
       expect(names2).toContainEqual('login.portal-page.hide')
       expect(names2).toContainEqual('contact.portal-page.hide')
       expect(names2).toContainEqual('protected.portal-page.hide')
-      
-    //document.querySelectorAll('*[class^="hide"]');
-    /*
-    0: loading.hide
-    1: error.hide
-    2: content.hide
-    */
-    //document.querySelectorAll('*[class^="portal-page hide"]');
-    /*
-    0: login.portal-page.hide
-    1: contact.portal-page.hide
-    2: protected.portal-page.hide
-    */
-
+  });
+  
+  describe('Navigation to Unprotected Portal Pages', () => {
+    test.each`
+      to             | expected1      | expected2      | expected3
+      ${'contact'}   | ${'login'}     | ${'protected'} | ${'home'}
+      ${'home'}      | ${'login'}     | ${'protected'} | ${'contact'}
+      // add new test cases here
+    `('navigate to $to',
+      async ({ to, expected1, expected2, expected3 } ) => {
+        const expected = `${rootURL}/#/${to}`;
+        await driver.get(expected);
+        let pageLoaded = await helpers.waitPageLoad(driver);
+        expect(pageLoaded).toBeTruthy();    
+        const actual = await driver.getCurrentUrl();
+        expect(actual).toEqual(expected);
+        let element = await helpers.querySelector(`${to}[class^="portal-page show"]`, driver)
+        element = await helpers.waitElementVisible(element, driver)
+        expect(element).toBeTruthy();
+        const elements = await helpers.querySelectorsAll('*[class^="hide"]', driver)
+        expect(elements).toBeTruthy();
+        expect(elements.length).toBeGreaterThanOrEqual(3);
+        let names = await helpers.getTagNameAndClasses(elements);
+        expect(names).toContainEqual('loading.hide')
+        expect(names).toContainEqual('error.hide')
+        expect(names).toContainEqual('content.hide')
+        const elements2 = await helpers.querySelectorsAll('*[class^="portal-page hide"]', driver)
+        expect(elements2).toBeTruthy();
+        expect(elements2.length).toBeGreaterThanOrEqual(3);
+        let names2 = await helpers.getTagNameAndClasses(elements2);
+        expect(names2).toContainEqual(`${expected1}.portal-page.hide`)
+        expect(names2).toContainEqual(`${expected2}.portal-page.hide`)
+        expect(names2).toContainEqual(`${expected3}.portal-page.hide`)
+    })
+  })
+  
 /*
 describe('currencyFormatter', () => {
   test.each`
@@ -100,7 +122,6 @@ describe('currencyFormatter', () => {
 })
 */
 
-  });
 
 
   test.skip('should click on navbar button to display a drawer1', async () => {
