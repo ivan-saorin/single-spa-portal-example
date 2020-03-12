@@ -1,4 +1,4 @@
-import {Builder, WebDriver, By} from 'selenium-webdriver';
+import {Builder, WebDriver, By, WebElement} from 'selenium-webdriver';
 import * as helpers from './helpers';
 
 const rootURL = 'http://localhost:8080';
@@ -36,17 +36,17 @@ describe(`Executing tests with [${driverName}] Selenium driver.`, () => {
       const actual = await driver.getCurrentUrl();
       const expected = `http://localhost:8080/#/home`;
       expect(actual).toEqual(expected);
-      let element = await helpers.querySelector('home[class^="portal-page show"]', driver)
-      element = await helpers.waitElementVisible(element, driver)
+      let element = await helpers.querySelector(driver, 'home[class^="portal-page show"]')
+      element = await helpers.waitElementVisible(driver, element)
       expect(element).toBeTruthy();
-      const elements = await helpers.querySelectorsAll('*[class^="hide"]', driver)
+      const elements = await helpers.querySelectorsAll(driver, '*[class^="hide"]')
       expect(elements).toBeTruthy();
       expect(elements.length).toBeGreaterThanOrEqual(3);
       let names = await helpers.getTagNameAndClasses(elements);
       expect(names).toContainEqual('loading.hide')
       expect(names).toContainEqual('error.hide')
       expect(names).toContainEqual('content.hide')
-      const elements2 = await helpers.querySelectorsAll('*[class^="portal-page hide"]', driver)
+      const elements2 = await helpers.querySelectorsAll(driver, '*[class^="portal-page hide"]')
       expect(elements2).toBeTruthy();
       expect(elements2.length).toBeGreaterThanOrEqual(3);
       let names2 = await helpers.getTagNameAndClasses(elements2);
@@ -63,7 +63,7 @@ describe(`Executing tests with [${driverName}] Selenium driver.`, () => {
       // add new test cases here
     `('navigate to $to',
       async ({ to, expected1, expected2, expected3 } ) => {
-        await verify(driver, true, to, null, expected1, expected2, expected3);
+        await verifyInternalPortalPage(driver, true, to, null, expected1, expected2, expected3);
     })
   })
 
@@ -74,17 +74,45 @@ describe(`Executing tests with [${driverName}] Selenium driver.`, () => {
       // add new test cases here
     `('navigate to $to',
       async ({ to, route, expected1, expected2, expected3 } ) => {
-        await verify(driver, true, to, route, expected1, expected2, expected3);
+        await verifyInternalPortalPage(driver, true, to, route, expected1, expected2, expected3);
+    })
+  })
+
+  describe('Navigation to Protected External Apps without JWT Token', () => {
+    test.each`
+      to                | route          | expected1      | expected2      | expected3 | contentExpected
+      ${'app1Angular8'} | ${'login'}     | ${'protected'} | ${'contact'}   | ${'home'} | ${false}
+      ${'app2Angular9'} | ${'login'}     | ${'protected'} | ${'contact'}   | ${'home'} | ${false}
+      ${'app3Vue'}      | ${'app3Vue'}   | ${'protected'} | ${'contact'}   | ${'home'} | ${true}
+      ${'app4React'}    | ${'login'}     | ${'protected'} | ${'contact'}   | ${'home'} | ${false}
+      // add new test cases here
+    `('navigate to $to',
+      async ({ to, route, expected1, expected2, expected3, contentExpected } ) => {
+        await verifyInternalPortalPage(driver, true, to, route, expected1, expected2, expected3, contentExpected);
     })
   })
 
   describe('Navigation to Protected Portal Pages with JWT Token', () => {
     test('Do login', async () => {
-      await verify(driver, true, 'protected', 'login', 'protected', 'contact', 'home');
+      await verifyInternalPortalPage(driver, true, 'protected', 'login', 'protected', 'contact', 'home');
       await doLogin(driver, 'admin', 'demo');
-      await verify(driver, false, 'protected', 'protected', 'login', 'contact', 'home');
+      await verifyInternalPortalPage(driver, false, 'protected', 'protected', 'login', 'contact', 'home');
     })
 
+    describe('Navigation to Protected External Apps with JWT Token', () => {
+      test.each`
+        to                | route              | expected1      | expected2      | expected3 | contentExpected
+        ${'app1Angular8'} | ${'app1Angular8'}  | ${'protected'} | ${'contact'}   | ${'home'} | ${true}
+        ${'app2Angular9'} | ${'app2Angular9'}  | ${'protected'} | ${'contact'}   | ${'home'} | ${true}
+        ${'app3Vue'}      | ${'app3Vue'}       | ${'protected'} | ${'contact'}   | ${'home'} | ${true}
+        ${'app4React'}    | ${'app4React'}     | ${'protected'} | ${'contact'}   | ${'home'} | ${true}
+        // add new test cases here
+      `('navigate to $to',
+        async ({ to, route, expected1, expected2, expected3, contentExpected } ) => {
+          await verifyInternalPortalPage(driver, true, to, route, expected1, expected2, expected3, contentExpected);
+      })
+    })
+  
     test.each`
       to             | route          | expected1      | expected2      | expected3
       ${'home'}      | ${null}        | ${'login'}     | ${'protected'} | ${'contact'}
@@ -92,7 +120,7 @@ describe(`Executing tests with [${driverName}] Selenium driver.`, () => {
       // add new test cases here
     `('navigate to $to',
       async ({ to, route, expected1, expected2, expected3 } ) => {
-        await verify(driver, true, to, route, expected1, expected2, expected3);
+        await verifyInternalPortalPage(driver, true, to, route, expected1, expected2, expected3);
     })
   })
 
@@ -132,7 +160,7 @@ describe('currencyFormatter', () => {
 
 
   test.skip('should click on navbar button to display a drawer1', async () => {
-    const anchor = await helpers.querySelector('[href=\'/en-US/firefox/\']', driver)
+    const anchor = await helpers.querySelector(driver, '[href=\'/en-US/firefox/\']')
     const actual = await anchor.getText()
     const expected = 'Firefox'
     expect(actual).toEqual(expected)
@@ -145,19 +173,20 @@ describe('currencyFormatter', () => {
 });
 
 async function doLogin(driver: WebDriver, username: string, password: string) {
-  const userInput = await helpers.querySelector('#user', driver)
-  const passwordInput = await helpers.querySelector('#password', driver)
-  const anchor = await helpers.querySelector('#submit', driver)
+  const userInput = await helpers.querySelector(driver, '#user')
+  const passwordInput = await helpers.querySelector(driver, '#password')
+  const anchor = await helpers.querySelector(driver, '#submit')
   await userInput.sendKeys(username)
   await passwordInput.sendKeys(password)
   await anchor.click();
 }
 
-async function verify(driver: WebDriver, navigate: boolean, to: string, route: string, expected1: string, expected2: string, expected3: string) {
+async function verifyInternalPortalPage(driver: WebDriver, navigate: boolean, to: string, route: string, expected1: string, expected2: string, expected3: string, contentExpected?: boolean) {
   let routing = to;
   if (route) {
     routing = route;
   }
+
   const current = `${rootURL}/#/${to}`;
   const expected = `${rootURL}/#/${routing}`;
   await driver.get(current);
@@ -165,21 +194,42 @@ async function verify(driver: WebDriver, navigate: boolean, to: string, route: s
   expect(pageLoaded).toBeTruthy();
   const actual = await driver.getCurrentUrl();
   expect(actual).toEqual(expected);
-  let element = await helpers.querySelector(`${routing}[class^="portal-page show"]`, driver);
-  element = await helpers.waitElementVisible(element, driver);
-  expect(element).toBeTruthy();
-  const elements = await helpers.querySelectorsAll('*[class^="hide"]', driver);
+  if (!contentExpected) {
+    let element = await helpers.querySelector(driver, `${routing}[class^="portal-page show"]`);
+    element = await helpers.waitElementVisible(driver, element);
+    expect(element).toBeTruthy();
+  }
+  else {
+    let content = await helpers.querySelector(driver, `content[class^="show"]`);
+    content = await helpers.waitElementVisible(driver, content);
+    expect(content).toBeTruthy();  
+  }
+  const elements = await helpers.querySelectorsAll(driver, '*[class^="hide"]');
   expect(elements).toBeTruthy();
-  expect(elements.length).toBeGreaterThanOrEqual(3);
+  expect(elements.length).toBeGreaterThanOrEqual(contentExpected ? 2 : 3);
   let names = await helpers.getTagNameAndClasses(elements);
   expect(names).toContainEqual('loading.hide');
   expect(names).toContainEqual('error.hide');
-  expect(names).toContainEqual('content.hide');
-  const elements2 = await helpers.querySelectorsAll('*[class^="portal-page hide"]', driver);
+  if (!contentExpected) {
+    expect(names).toContainEqual('content.hide');
+  }
+  const elements2 = await helpers.querySelectorsAll(driver, '*[class^="portal-page hide"]');
   expect(elements2).toBeTruthy();
   expect(elements2.length).toBeGreaterThanOrEqual(3);
   let names2 = await helpers.getTagNameAndClasses(elements2);
   expect(names2).toContainEqual(`${expected1}.portal-page.hide`);
   expect(names2).toContainEqual(`${expected2}.portal-page.hide`);
   expect(names2).toContainEqual(`${expected3}.portal-page.hide`);
+  let iframes: WebElement[] = await driver.findElements(By.tagName("iframe"));
+  expect(iframes.length).toEqual(1)
+  if (contentExpected) {
+    let postMessage = await helpers.querySelector(driver, `a[class^="postmsg"]`);
+    await postMessage.click()    
+    await driver.switchTo().frame(0);
+
+
+    // Switch back to parent frame (top)
+    await driver.switchTo().parentFrame();
+	  await driver.switchTo().defaultContent();
+  }
 }

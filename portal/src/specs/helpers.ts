@@ -10,7 +10,7 @@ export async function waitPageLoad(driver: WebDriver): Promise<boolean> {
   });
 }
 
-export async function querySelector(selector: string, driver: WebDriver) {
+export async function querySelector(driver: WebDriver, selector: string) {
   const el = await driver.wait(
     until.elementLocated(By.css(selector)),
     waitUntilTime
@@ -18,11 +18,11 @@ export async function querySelector(selector: string, driver: WebDriver) {
   return el;
 }
 
-export async function waitElementVisible(element: WebElement, driver: WebDriver) {
+export async function waitElementVisible(driver: WebDriver, element: WebElement) {
   return await driver.wait(until.elementIsVisible(element), waitUntilTime)
 }
 
-export async function querySelectorsAll(selector: string, driver: WebDriver): Promise<WebElement[]> {
+export async function querySelectorsAll(driver: WebDriver, selector: string): Promise<WebElement[]> {
   const els = await driver.wait(
     until.elementsLocated(By.css(selector)),
     waitUntilTime
@@ -30,7 +30,7 @@ export async function querySelectorsAll(selector: string, driver: WebDriver): Pr
   return els;
 }
 
-export async function waitElementsVisible(elements: WebElement[], driver: WebDriver): Promise<WebElement[]> {
+export async function waitElementsVisible(driver: WebDriver, elements: WebElement[]): Promise<WebElement[]> {
   let res: Promise<WebElement>[] = [];
   elements.forEach((el) => {
     res.push(driver.wait(until.elementIsVisible(el), waitUntilTime));
