@@ -78,7 +78,7 @@ export default class Home extends React.Component<RouteComponentProps, IState> {
                 </nav>
 
                 {messagePresent && (
-                    <div className="text-center">
+                    <div className="text-center host-message">
                         <h2>{message}</h2>
                     </div>
                 )}

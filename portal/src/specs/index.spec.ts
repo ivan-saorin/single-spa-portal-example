@@ -1,4 +1,4 @@
-import {Builder, WebDriver, By, WebElement} from 'selenium-webdriver';
+import {Builder, WebDriver, By, WebElement, until} from 'selenium-webdriver';
 import * as helpers from './helpers';
 
 const rootURL = 'http://localhost:8080';
@@ -101,15 +101,15 @@ describe(`Executing tests with [${driverName}] Selenium driver.`, () => {
 
     describe('Navigation to Protected External Apps with JWT Token', () => {
       test.each`
-        to                | route              | expected1      | expected2      | expected3 | contentExpected
-        ${'app1Angular8'} | ${'app1Angular8'}  | ${'protected'} | ${'contact'}   | ${'home'} | ${true}
-        ${'app2Angular9'} | ${'app2Angular9'}  | ${'protected'} | ${'contact'}   | ${'home'} | ${true}
-        ${'app3Vue'}      | ${'app3Vue'}       | ${'protected'} | ${'contact'}   | ${'home'} | ${true}
-        ${'app4React'}    | ${'app4React'}     | ${'protected'} | ${'contact'}   | ${'home'} | ${true}
+        to                | route              | expected1      | expected2      | expected3 | contentExpected | postMessageSelector
+        ${'app1Angular8'} | ${'app1Angular8'}  | ${'protected'} | ${'contact'}   | ${'home'} | ${true}         | ${'host-message p'}
+        ${'app2Angular9'} | ${'app2Angular9'}  | ${'protected'} | ${'contact'}   | ${'home'} | ${true}         | ${'host-message p'}
+        ${'app3Vue'}      | ${'app3Vue'}       | ${'protected'} | ${'contact'}   | ${'home'} | ${true}         | ${'.host-message'}
+        ${'app4React'}    | ${'app4React'}     | ${'protected'} | ${'contact'}   | ${'home'} | ${true}         | ${'.host-message'}
         // add new test cases here
       `('navigate to $to',
-        async ({ to, route, expected1, expected2, expected3, contentExpected } ) => {
-          await verifyInternalPortalPage(driver, true, to, route, expected1, expected2, expected3, contentExpected);
+        async ({ to, route, expected1, expected2, expected3, contentExpected, postMessageSelector } ) => {
+          await verifyInternalPortalPage(driver, true, to, route, expected1, expected2, expected3, contentExpected, postMessageSelector);
       })
     })
   
@@ -181,7 +181,7 @@ async function doLogin(driver: WebDriver, username: string, password: string) {
   await anchor.click();
 }
 
-async function verifyInternalPortalPage(driver: WebDriver, navigate: boolean, to: string, route: string, expected1: string, expected2: string, expected3: string, contentExpected?: boolean) {
+async function verifyInternalPortalPage(driver: WebDriver, navigate: boolean, to: string, route: string, expected1: string, expected2: string, expected3: string, contentExpected?: boolean, postMessageSelector?: string) {
   let routing = to;
   if (route) {
     routing = route;
@@ -222,14 +222,37 @@ async function verifyInternalPortalPage(driver: WebDriver, navigate: boolean, to
   expect(names2).toContainEqual(`${expected3}.portal-page.hide`);
   let iframes: WebElement[] = await driver.findElements(By.tagName("iframe"));
   expect(iframes.length).toEqual(1)
-  if (contentExpected) {
+  if (contentExpected && postMessageSelector) {
+    await driver.sleep(500) // Very Important
     let postMessage = await helpers.querySelector(driver, `a[class^="postmsg"]`);
-    await postMessage.click()    
-    await driver.switchTo().frame(0);
+    await postMessage.click()  
+    //setTimeout(async () => {
+    //}, 500)
 
+    let iFrame = await helpers.querySelector(driver, `#mfc`);
+    await driver.switchTo().frame(iFrame);
 
+    //postMessageSelector
+    let iFrameMsg = await helpers.querySelector(driver, postMessageSelector);
+    await helpers.waitElementVisible(driver, iFrameMsg)
+    let iFrameText = await iFrameMsg.getText();
+    expect(iFrameText).toBeDefined();    
+    
     // Switch back to parent frame (top)
     await driver.switchTo().parentFrame();
-	  await driver.switchTo().defaultContent();
+    await driver.switchTo().defaultContent();
+
+    let portalMsg = await helpers.querySelector(driver, 'message');
+    await helpers.waitElementVisible(driver, portalMsg)
+    let portalText = await portalMsg.getText();
+
+    if (iFrameText.startsWith('[')) {
+      iFrameText = iFrameText.split(']')[1];
+    }
+    else {
+      iFrameText = ' ' + iFrameText;
+    }
+    portalText = portalText.split(':')[1];
+    expect(iFrameText).toEqual(portalText); 
   }
 }

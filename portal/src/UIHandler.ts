@@ -242,8 +242,10 @@ export class UIHandler {
         iframe.scrolling = 'no';
         iframe.marginHeight = '0';
         iframe.marginWidth = '0';
-        iframe.onload = this.loadedEvt;
-        //iframe.onerror = loadingErrorEvt;
+        //iframe.onerror = loadingErrorEvt; // Doing this every time causes Selenium to get crazy!
+        if (!iframe.onload) {
+            iframe.onload = this.loadedEvt;
+        }
 
         //this.errorTimeout = setTimeout(this.loadingError, this.errorTimeoutValue);
         this.load();

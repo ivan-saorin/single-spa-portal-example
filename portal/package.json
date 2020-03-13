@@ -7,8 +7,8 @@
     "start": "npm run build:dev",
     "build:dev": "webpack-dev-server --env dev --mode none",
     "build:prod": "webpack --env prod --mode production",
-    "e2e": "del dist /S /F /Q >> ./dist-cleanup-log.txt && tsc && jest ./dist/src/specs/index.spec.js --driver=firefox",
-    "e2e2": "del dist /S /F /Q && tsc && jest ./dist/src/specs/index.spec.js --driver=firefox && jest ./dist/src/specs/index.spec.js --driver=chrome",
+    "e2e2": "del dist /S /F /Q >> ./dist-cleanup-log.txt && tsc && jest ./dist/src/specs/index.spec.js --driver=firefox",
+    "e2e": "del dist /S /F /Q && tsc && jest ./dist/src/specs/index.spec.js --driver=firefox && jest ./dist/src/specs/index.spec.js --driver=chrome",
     "depcruiser:start": "node ./node_modules/dependency-cruiser/bin/dependency-cruise.js --include-only \"^src\" --output-type dot src | dot -T svg > dependency-graph.svg",
     "depcruiser:start2": "node ./node_modules/dependency-cruiser/bin/dependency-cruise.js --max-depth 3 --output-type dot src | dot -T svg > dependency-graph.svg"
   },

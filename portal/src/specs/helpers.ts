@@ -22,6 +22,10 @@ export async function waitElementVisible(driver: WebDriver, element: WebElement)
   return await driver.wait(until.elementIsVisible(element), waitUntilTime)
 }
 
+export async function waitElementNotVisible(driver: WebDriver, element: WebElement) {
+  return await driver.wait(until.elementIsNotVisible(element), waitUntilTime)
+}
+
 export async function querySelectorsAll(driver: WebDriver, selector: string): Promise<WebElement[]> {
   const els = await driver.wait(
     until.elementsLocated(By.css(selector)),

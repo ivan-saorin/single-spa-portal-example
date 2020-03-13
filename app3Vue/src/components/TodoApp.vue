@@ -2,7 +2,7 @@
   <section class="todoapp">
     <header class="header">
       <h1>VueJS - Todos</h1>
-      <h4 class="message" v-if="messagePresent">{{getmessage}}</h4>
+      <h4 class="host-message" v-if="messagePresent">{{getmessage}}</h4>
       <input class="new-todo" v-model="newTodoTitle" @keyup.enter="createTodo()" placeholder="What needs to be done?" autofocus>
     </header>
     <ul class="navigation">
