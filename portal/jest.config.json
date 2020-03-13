@@ -1,0 +1,14 @@
+{
+    "roots": ["."],
+    "reporters": [
+        "default",
+		["jest-html-reporter", {
+			"pageTitle": "Test Suite Reporter",
+			"outputPath": "test-report.html",
+			"includeFailureMsg": true,
+			"includeConsoleLog": true,
+			"useCssFile" : true,
+			"sort": "titleAsc"
+		}]
+    ]
+}

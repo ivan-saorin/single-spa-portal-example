@@ -1,5 +1,7 @@
 import {Builder, WebDriver, By, WebElement, until} from 'selenium-webdriver';
 import * as helpers from './helpers';
+import edge from 'selenium-webdriver/edge'
+import chrome from 'selenium-webdriver/chrome'
 
 const rootURL = 'http://localhost:8080';
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 60 * 5;
@@ -20,7 +22,12 @@ describe(`Executing tests with [${driverName}] Selenium driver.`, () => {
     if (!driverName) {
       driverName = 'chrome';
     }
-    driver = driver = new Builder().forBrowser(driverName).build();
+    let builder = new Builder().forBrowser(driverName);
+    if (driverName == 'MicrosoftEdge') {
+      let service = new edge.ServiceBuilder('C:\\Users\\ivans\\git\\single-spa-portal-example\\portal\\msedgedriver.exe');
+      builder.setEdgeService(service);
+    }
+    driver = builder.build();
     driver.get(rootURL);
   });
 
