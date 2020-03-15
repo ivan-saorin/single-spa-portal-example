@@ -2,7 +2,7 @@ import * as utils from './utils';
 import { Router, RouterMode } from './Router';
 import { Routes } from './Routes';
 import * as url from 'url';
-import { Mediator } from './Mediator';
+import { Dispatcher } from './Dispatcher';
 import { ModuleHandler } from './moduleHandler';
 import { JwtService } from './auth/JWTService';
 import { AuthGuard } from './auth/AuthGuard';
@@ -13,7 +13,7 @@ export class UIHandler {
     private errorTimeout: NodeJS.Timeout;
     private messageTimeout: NodeJS.Timeout;
     private target: HTMLElement;
-    private host: Mediator;
+    private host: Dispatcher;
     private activeModule: ModuleHandler = null;
     private wereHeadingTo: string = null;
     private el: Elements;
@@ -21,7 +21,7 @@ export class UIHandler {
     constructor(private router: Router, private routes: Routes, private jwt: JwtService, private guard: AuthGuard) {
         this.el = new Elements();
         this.router = router;
-        this.host = new Mediator(this);
+        this.host = new Dispatcher(this);
     }
 
     private microFrontendByRoute(path: string): string {
@@ -315,7 +315,7 @@ export class UIHandler {
         if (anchor) {            
             utils.processElementsClass(document, '.navLinks a', 'active');
             anchor.classList.add('active');
-        };
+        }
     }
 
     public handleRedirectPath = (): void => {
@@ -427,16 +427,15 @@ export class UIHandler {
 
     public init() {
 
-        let that = this;
-        this.initNavLinks(that);
-        this.initContact(that);
-        this.initPostMessage(that);
+        this.initNavLinks(this);
+        this.initContact(this);
+        this.initPostMessage(this);
 
-        console.groupCollapsed('[HOST Initial config:')
-        console.groupCollapsed('[HOST Allowed Sources:')
+        console.groupCollapsed('[HOST] Initial config:')
+        console.groupCollapsed('[HOST] Allowed Sources:')
         console.table(this.getAllowedSources());
         console.groupEnd();
-        console.groupCollapsed('[HOST Allowed Routes:')
+        console.groupCollapsed('[HOST] Allowed Routes:')
         console.table(this.getAllowedRoutes());
         console.groupEnd();
         console.groupEnd();

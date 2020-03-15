@@ -1,69 +1,133 @@
-import { host }  from "./rimless";
-import UIHandler from "./UIHandler";
+/*!
+ * based on code in: https://github.com/mehdishojaei/mediator
+*/
 
-
-interface IFrameLoaded {
-    allowedNavigations: string[],
-    accessToken?: string,
-    payload: any
-}
+//const one = new Promise<string>((resolve, reject) => {});
 
 export class Mediator {
-    private connection: any = null;
-    private payload: any = {};
-    constructor(private uiHandler: UIHandler) {
 
+    private mediator: Object = {};
+    private cache: any = {};
+
+    constructor() {}
+
+    private isArray(obj: Object) {
+        return Object.prototype.toString.call(obj) === '[object Array]';
     }
 
-    public async connect(iframe: HTMLIFrameElement) {
-        this.connection = await host.connect(iframe, {
-            log: (...values: any[]) => console.log('[HOST]', ...values),
-            frameLoaded: (sender: string, notification: string, origin: string, id: string): IFrameLoaded => {
-                let accessToken = this.uiHandler.handleFrameLoaded(sender, id);
-                if (accessToken) 
-                    return {                    
-                        allowedNavigations: this.uiHandler.getAllowedNavigations(),
-                        accessToken: accessToken,
-                        payload: this.payload
-                    };                
-                else
-                    return {                    
-                        allowedNavigations: this.uiHandler.getAllowedNavigations(),
-                        payload: this.payload
-                    };
-            },
-            navigate: (url: string, payload?: any) => {
-                this.payload = payload || {};
-                this.uiHandler.navigate(url);
-            },
-            textMessage: (sender: string, notification: string, text: string) => this.handleTextMessage(sender, notification, text)
+    // Returns a promise of all the promises returned from subscribers callbacks.
+    // If a promise fails, the result promise will not be reject and continue waiting
+    // for other promises.
+    // The result promise will be resolve if the return promises of all the
+    // subscribers resolves, and reject otherwise.
+    public publish(channel: string, hash: any): any {
+        let that: any = this;
+        let promises: number = 0;
+        let finishedPromises: number = 0;
+        let faileds: number = 0;
+        let subscribers = this.cache[channel];
+
+        let promise = new Promise<any>((resolve, reject) => {
+
+            if (subscribers) {
+                function checkFinished() {
+                    ++finishedPromises;
+        
+                    // Continue on failure
+                    if (finishedPromises == promises) {
+                      if (faileds) {
+                        reject();
+                      } else {
+                        resolve();
+                      }
+                    }        
+                }
+        
+                function  callbackFail() {
+                    ++faileds;
+                    checkFinished();
+                }
+    
+                for (var i = 0, len = subscribers.length; i < len; i++) {
+                    let subscriber = subscribers[i];
+                    if (!hash['channel']) {
+                        hash['channel'] = channel;
+                    } else {
+                        hash['_channel'] = channel;
+                    }
+                    let result = subscriber.callback(subscriber.context || that, hash);
+        
+                    if (!result) {
+                        ++promises;
+                        break;
+                    }
+        
+                    if (result && typeof result.then === 'function') {
+                        ++promises;
+                        resolve(result.then(checkFinished, callbackFail));
+                    }
+                }
+                resolve();
+            }
+            else {
+                reject();
+            }
+    
+            if (!promises) {
+              resolve();
+            }        
         });
+        return promise;
     }
 
-    public handleTextMessage(sender: string, notification: string, text: string) {
-        console.log(`[HOST] [${text}]`);
-        this.uiHandler.handleTextMessage(text);
-    }
+    subscribe (channels: any, callback: any, context?: any) {
+        channels = this.isArray(channels) ? channels : (<string>channels.split(/\s+/) || []);
 
-    public async disconnect() {
-        this.connection.close();
-        this.connection = null;
-    }
 
-    public isConnected(): boolean {
-        return this.connection != null;
-    }
+        for (var i = 0, len = channels.length; i < len; i++) {
+            var channel = channels[i];
 
-    public async sendMessage(message: any) {
-        // call remote procedures on host
-        console.log('[HOST] calling HOST.textMessage');
-        if (this.connection) {
-            //const res = await this.connection.remote.textMessage(message).catch((err: any) => { console.error('[HOST] ', err); });
-            await this.connection.remote.textMessage(message).catch((err: any) => { console.error('[HOST] ', err); });
+            if (!this.cache[channel]) {
+                this.cache[channel] = [];
+            }
+
+            this.cache[channel].push({ callback: callback, context: context });            
         }
-        else {
-            console.warn('[HOST] sendMessage is only available for external pages.');
-            //console.log('[HOST]', res);   // hello there
-        }        
-    }
+    };
+
+    unsubscribe(channels: any, callback: any) {
+        let i, k, channel, subscribers, newSubscribers;
+        channels = this.isArray(channels) ? channels : (channels.split(/\s+/) || []);
+
+        let channelsLength = channels.length;
+        for (i = 0; i < channelsLength; i++) {
+            channel = channels[i];
+
+            if (!callback) {
+                delete this.cache[channel];
+                return;
+            }
+
+            subscribers = this.cache[channel];
+
+            if (!subscribers) {
+                throw 'Channel "' + channel + '" was not subscribed previously!';
+            }
+
+            newSubscribers = [];
+
+            let subscribersLength = subscribers.length
+            for (k = 0; k < subscribersLength; k++) {
+                if (subscribers[k].callback !== callback) {
+                    newSubscribers.push(subscribers[k]);
+                }
+            }
+
+            if (newSubscribers.length > 0) {
+                this.cache[channel] = newSubscribers;
+            } else {
+                delete this.cache[channel];
+            }
+        }
+    };
 }
