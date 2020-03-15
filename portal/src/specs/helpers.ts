@@ -48,7 +48,6 @@ export async function getTagNameAndClasses(elements: WebElement[]): Promise<stri
     a.push(element.getTagName())
     a.push(element.getAttribute('class'))
     let s: string[] = await Promise.all(a);
-    //console.log('s[0]: ', s[0], 's[1]', s[1])
     return s[0] + '.' + s[1].replace(' ', '.')
   });
   return await Promise.all(names);

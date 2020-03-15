@@ -6,7 +6,7 @@ import chrome from 'selenium-webdriver/chrome'
 const rootURL = 'http://localhost:8080';
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 60 * 5;
 
-//console.log('variables',  process.argv);
+//console.log('[HOST] variables',  process.argv);
 let driverName: string;
 if (process.argv.length > 2) {
   let kvp = process.argv[3].split('=');
@@ -233,8 +233,6 @@ async function verifyInternalPortalPage(driver: WebDriver, navigate: boolean, to
     await driver.sleep(500) // Very Important
     let postMessage = await helpers.querySelector(driver, `a[class^="postmsg"]`);
     await postMessage.click()  
-    //setTimeout(async () => {
-    //}, 500)
 
     let iFrame = await helpers.querySelector(driver, `#mfc`);
     await driver.switchTo().frame(iFrame);

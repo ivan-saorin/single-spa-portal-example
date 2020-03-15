@@ -2,16 +2,27 @@ import { Routes, Target } from "./Routes";
 import { Router } from './Router';
 import { UIHandler } from './UIHandler';
 import { AuthGuard } from './auth/AuthGuard';
+import { suffix } from './console';
 
 export class Navigation {
     constructor (private router: Router, public routes: Routes, private uiHandler: UIHandler, private auth: AuthGuard) {        
-        this.uiHandler = uiHandler;
-        
+        this.uiHandler = uiHandler;        
+        console.groupCollapsed('[HOST] Routes:');
+        let log: any[] = [];
         for (const key in routes) {
-            //console.log('key: ', key, routes[key]);
+            log.push(this.logRow(key, routes[key]))
             this.addRoute(key, routes[key]);
         }
+        console.table(log);
+        console.groupEnd();
         this.router.run();
+    }
+
+    private logRow(key: string, target: Target): any {
+        let result: any;
+        let type: string = target.external ? 'external' : target.internal ? 'internal' : target.redirect ? 'redirect' : 'unknown';
+        result = {key, type, ...(target.external ? target.external : target.internal ? target.internal : target.redirect ? target.redirect : {})};
+        return result;
     }
 
     private addRoute(route: string, target: Target) {        
@@ -23,10 +34,10 @@ export class Navigation {
             throw new TypeError('Invalid target value: [' + target + ']');
         }
 
-        //console.log('addind route: ', route, target);
+        //console.log('[HOST] addind route: ', route, target);
         this.router.add(route, fx);
         if (fx == this.uiHandler.handleExternalPath ) {
-            //console.log('addind route: ', route + '/*', target);
+            //console.log('[HOST] addind route: ', route + '/*', target);
             this.router.add(route + '/*', fx);
         }
     }

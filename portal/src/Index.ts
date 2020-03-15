@@ -3,11 +3,8 @@ import { Routes } from './Routes';
 import { Router, RouterMode } from './Router';
 import { Navigation } from './Navigation';
 import { UIHandler } from './UIHandler';
-//import { LoginHandler } from './LoginHandler';
 import { AuthGuard } from './auth/AuthGuard';
 import { JwtService } from './auth/JWTService';
-//import { Mediator } from './Mediator';
-
 
 const routes: Routes = {    
     "/": {
@@ -76,6 +73,7 @@ const routes: Routes = {
 
 let baseUrl = 'http://localhost:3200';
 let jwt = new JwtService(baseUrl);
+
 // History mode do not support loading the app throug the direct change of the url in the navigation bar of the browser. Let's use Hash mode instead.
 let router = new Router(RouterMode.Hash);
 let auth = new AuthGuard(jwt, router, routes);
@@ -87,24 +85,24 @@ uiHandler.init();
 let mediator = new Mediator();
 
 mediator.subscribe('test.topic', (context: any, message: any) => {
-    console.warn('test.topic', message);
+    console.warn('[HOST] test.topic', message);
 })
 
 mediator.publish('test.topic', {test: 'toast'}).then((message: any) => {
-    console.warn('1 test.topic received', message);
+    console.warn('[HOST] 1 test.topic received', message);
 }, (rejected: any) => {
-    console.warn('1 test.topic rejected', rejected);
+    console.warn('[HOST] 1 test.topic rejected', rejected);
 });
 
 mediator.publish('test.topic', {test: 'toast'}).then((message: any) => {
-    console.warn('2 test.topic received', message);
+    console.warn('[HOST] 2 test.topic received', message);
 }, (rejected: any) => {
-    console.warn('2 test.topic rejected', rejected);
+    console.warn('[HOST] 2 test.topic rejected', rejected);
 });
 
 mediator.publish('test.topic2', {test: 'should not receive'}).then((message: any) => {
-    console.warn('test.topic2 received', message);
+    console.warn('[HOST] test.topic2 received', message);
 }, (rejected: any) => {
-    console.warn('test.topic2 rejected', rejected);
+    console.warn('[HOST] test.topic2 rejected', rejected);
 });
 */

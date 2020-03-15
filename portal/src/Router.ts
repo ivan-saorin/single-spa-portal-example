@@ -61,7 +61,6 @@ export class Router extends EventTarget {
 	}
 
 	navigate(path: string): void {
-		console.warn('router navigate: ', path);
 		if (this.mode == RouterMode.History) {
 			window.history.pushState(null, "", this.normalizePath(`${this.options.root}/${path}`));
 		} else if (this.mode == RouterMode.Hash) {
@@ -136,7 +135,7 @@ export class Router extends EventTarget {
 		let routeSegments = this.getPathSegments(route.path);
 		let args = new Map<string, string>();
 
-		//console.log(pathSegments, routeSegments);
+		//console.log('[HOST] ', pathSegments, routeSegments);
 
 		if (pathSegments.length != routeSegments.length) return false;
 

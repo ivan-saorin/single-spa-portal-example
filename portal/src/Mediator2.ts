@@ -57,10 +57,7 @@ export class Mediator {
                     }
                     let result = subscriber.callback(subscriber.context || that, hash);
         
-                    //if (result == false) {
                     if (!result) {
-                        //break;
-                        //resolve(++promises);
                         ++promises;
                         break;
                     }

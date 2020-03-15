@@ -1,5 +1,4 @@
 
-
 export function hasClass(el: Element, className: string) {
     if (!el) return;
     if (el.classList)

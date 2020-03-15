@@ -1,6 +1,5 @@
 import Axios from 'axios';
 import { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
-//import * as util from 'typed-rest-client/Util';
 
 export interface HttpBinData {
     url: string;
@@ -36,12 +35,12 @@ export class JwtService {
     public isAuthenticated(): boolean {
         //const token = localStorage.getItem('access_token');
         const token = this.accessToken;
+
         if (token === null)
             return false;
         // Check whether the token is expired and return
         // true or false
         return !this.isTokenExpired(token, 60);
-        //return !this.jwtHelper.isTokenExpired(token);
     }
 
     get accessToken() {
@@ -49,12 +48,12 @@ export class JwtService {
     }
 
     async login(userInfo: User) {
-        console.log('login ', userInfo.user, userInfo.password);
+        console.log('[HOST] login request received for username [%s]', userInfo.user);
 
         try {
             const response = await this.axios.post<AccessToken>('/login', userInfo);
             const result: AccessToken = response.data;
-            console.warn('login < access_token', result.access_token);
+            console.warn('[HOST] login < access_token', result.access_token);
             //localStorage.setItem('access_token', result.access_token);
             this._accessToken = result.access_token;
 
@@ -62,7 +61,7 @@ export class JwtService {
         catch (err) {
             if (err && err.response) {
                 const axiosError = err as AxiosError
-                console.error(axiosError);
+                console.error('[HOST] ', axiosError);
             }
 
             throw err;
@@ -70,12 +69,12 @@ export class JwtService {
     }
 
     async register(userInfo: User) {
-        console.log('register ', userInfo.user, userInfo.password);
+        console.log('[HOST] register ', userInfo.user, userInfo.password);
 
         try {
             const response = await this.axios.post<AccessToken>('/register', userInfo);
             const result: AccessToken = response.data;
-            console.warn('register < access_token', result.access_token);
+            console.warn('[HOST] register < access_token', result.access_token);
             //localStorage.setItem('access_token', result.access_token);
             this._accessToken = result.access_token;
             this.login(userInfo);
@@ -83,7 +82,7 @@ export class JwtService {
         catch (err) {
             if (err && err.response) {
                 const axiosError = err as AxiosError;
-                console.error(axiosError);
+                console.error('[HOST] ', axiosError);
             }
 
             throw err;

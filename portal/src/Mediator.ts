@@ -58,11 +58,11 @@ export class Mediator {
         // call remote procedures on host
         console.log('[HOST] calling HOST.textMessage');
         if (this.connection) {
-            //const res = await this.connection.remote.textMessage(message).catch((err: any) => { console.error(err); });
-            await this.connection.remote.textMessage(message).catch((err: any) => { console.error(err); });
+            //const res = await this.connection.remote.textMessage(message).catch((err: any) => { console.error('[HOST] ', err); });
+            await this.connection.remote.textMessage(message).catch((err: any) => { console.error('[HOST] ', err); });
         }
         else {
-            console.warn('sendMessage is only available for external pages.');
+            console.warn('[HOST] sendMessage is only available for external pages.');
             //console.log('[HOST]', res);   // hello there
         }        
     }

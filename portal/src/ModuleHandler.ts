@@ -4,7 +4,7 @@ import { UIHandler } from './UIHandler';
 
 export abstract class ModuleHandler {
 
-    constructor(protected uiHandler: UIHandler, protected router: Router, protected document: Document, protected routes: Routes, protected selector: string) {
+    constructor(protected uiHandler: UIHandler, protected router: Router, protected routes: Routes, protected selector: string) {
         
     }
 
