@@ -77,7 +77,7 @@ let jwt = new JwtService(baseUrl);
 // History mode do not support loading the app throug the direct change of the url in the navigation bar of the browser. Let's use Hash mode instead.
 let router = new Router(RouterMode.Hash);
 let auth = new AuthGuard(jwt, router, routes);
-let uiHandler = new UIHandler(router, document, routes, jwt, auth);
+let uiHandler = new UIHandler(router, routes, jwt, auth);
 new Navigation(router, routes, uiHandler, auth);
 uiHandler.init();
 

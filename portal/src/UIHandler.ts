@@ -6,6 +6,7 @@ import { Mediator } from './Mediator';
 import { ModuleHandler } from './moduleHandler';
 import { JwtService } from './auth/JWTService';
 import { AuthGuard } from './auth/AuthGuard';
+import { Elements } from './Elements'
 
 export class UIHandler {
     private errorTimeoutValue: number = 7000;
@@ -15,9 +16,10 @@ export class UIHandler {
     private host: Mediator;
     private activeModule: ModuleHandler = null;
     private wereHeadingTo: string = null;
+    private el: Elements;
 
-    constructor(private router: Router, private document: Document, private routes: Routes, private jwt: JwtService, private guard: AuthGuard) {
-        this.document = document;
+    constructor(private router: Router, private routes: Routes, private jwt: JwtService, private guard: AuthGuard) {
+        this.el = new Elements();
         this.router = router;
         this.host = new Mediator(this);
     }
@@ -71,12 +73,8 @@ export class UIHandler {
         return this.getAllowedRoutes([url]);
     }
 
-    private getBasePathEl(): HTMLAnchorElement {
-        return <HTMLAnchorElement>document.getElementById('basePath');
-    }
-
     private getBasePath() {
-        let basePathEl = this.getBasePathEl();
+        let basePathEl = this.el.getBasePathEl();
         return basePathEl ? basePathEl.href : "";
     }
 
@@ -87,12 +85,8 @@ export class UIHandler {
         return origin;
     }
 
-    private getIFrameEl() {
-        return <HTMLIFrameElement>document.getElementsByTagName('IFRAME')[0];
-    }
-
     private getIFrameSrc() {
-        let iFrame = this.getIFrameEl();
+        let iFrame = this.el.getIFrameEl();
         return iFrame.src;
     }
 
@@ -100,22 +94,6 @@ export class UIHandler {
         let src = this.getIFrameSrc();
         var p = url.parse(src);
         return p.protocol + '//' + p.host;
-    }
-
-    private getLoadingEl() {
-        return <HTMLElement>document.getElementsByTagName('LOADING')[0];
-    }
-
-    private getErrorEl() {
-        return <HTMLElement>document.getElementsByTagName('ERROR')[0];
-    }
-
-    private getContentEl() {
-        return <HTMLElement>document.getElementsByTagName('CONTENT')[0];
-    }
-
-    private getMessageEl() {
-        return <HTMLElement>document.getElementsByTagName('MESSAGE')[0];
     }
 
     private getAllowedSources(): string[] {
@@ -130,42 +108,42 @@ export class UIHandler {
     }
 
     private start() {
-        let loadingEl = this.getLoadingEl();
+        let loadingEl = this.el.getLoadingEl();
         utils.removeClass(loadingEl, 'show');
         utils.addClass(loadingEl, 'hide');
 
-        let errorEl = this.getErrorEl();
+        let errorEl = this.el.getErrorEl();
         utils.removeClass(errorEl, 'show');
         utils.addClass(errorEl, 'hide');
 
-        let contentEl = this.getContentEl();
+        let contentEl = this.el.getContentEl();
         utils.removeClass(contentEl, 'show');
         utils.addClass(contentEl, 'hide');
     }
 
     private load() {
         this.hidePages("portal-page");
-        let loadingEl = this.getLoadingEl();
+        let loadingEl = this.el.getLoadingEl();
         utils.removeClass(loadingEl, 'hide');
         utils.addClass(loadingEl, 'show');
     }
 
     private loaded = () => {
-        let loadingEl = this.getLoadingEl();
+        let loadingEl = this.el.getLoadingEl();
         utils.removeClass(loadingEl, 'show');
         utils.addClass(loadingEl, 'hide');
-        let contentEl = this.getContentEl();
+        let contentEl = this.el.getContentEl();
         utils.removeClass(contentEl, 'hide');
         utils.addClass(contentEl, 'show');
         clearTimeout(this.errorTimeout);
     }
 
     public loadingError = () => {
-        let loadingEl = this.getLoadingEl();
+        let loadingEl = this.el.getLoadingEl();
         utils.removeClass(loadingEl, 'show');
         utils.addClass(loadingEl, 'hide');
 
-        let errorEl = this.getErrorEl();
+        let errorEl = this.el.getErrorEl();
         errorEl.innerHTML = 'Error loading content.';
         utils.removeClass(errorEl, 'hide');
         utils.addClass(errorEl, 'show');
@@ -192,7 +170,7 @@ export class UIHandler {
 
     public async postMessage(message: any) {
         if (!this.host.isConnected()) {
-            let iframe = this.getIFrameEl();
+            let iframe = this.el.getIFrameEl();
             await this.host.connect(iframe);
         }
         await this.host.sendMessage(message);
@@ -232,7 +210,7 @@ export class UIHandler {
 
         console.log('[HOST] Location changed to %s path: %s', 'external', path);        
 
-        const iframe = <HTMLIFrameElement>this.document.getElementById('mfc');
+        const iframe = <HTMLIFrameElement> document.getElementById('mfc');
         iframe.frameBorder = '0';
         iframe.scrolling = 'no';
         iframe.marginHeight = '0';
@@ -248,7 +226,7 @@ export class UIHandler {
             this.host.disconnect();
         }
         if (!this.host.isConnected()) {
-            let iframe = this.getIFrameEl();
+            let iframe = this.el.getIFrameEl();
             this.host.connect(iframe);
         }
         // => URL changed to /foo/bar
@@ -261,7 +239,7 @@ export class UIHandler {
             throw new Error('"classes" actual parameter must be defined');
         if ((classes.length < 2) || (classes.length > 2))
             throw new Error('"classes" actual parameter must be an array of length 2');
-        let element = this.document.getElementsByTagName(name.toUpperCase())[0];
+        let element = document.getElementsByTagName(name.toUpperCase())[0];
         utils.removeClass(element, classes[0]);
         utils.addClass(element, classes[1]);
     }
@@ -279,8 +257,8 @@ export class UIHandler {
     }
 
     private hidePages(clazz: string) {
-        utils.processElementsClass2(this.document, clazz, 'show', 'hide');
-        let contentEl = this.getContentEl();
+        utils.processElementsClass2(document, clazz, 'show', 'hide');
+        let contentEl = this.el.getContentEl();
         utils.removeClass(contentEl, 'show');
         utils.addClass(contentEl, 'hide');
         utils.removeClass(contentEl, 'show');
@@ -299,7 +277,7 @@ export class UIHandler {
         }
         console.log('[HOST] moduleFactory creating module [%s] with handler [%s]', selector, handlerName);
         let module = await import('./LoginHandler'); 
-        return new module.default(this, this.router, this.document, this.routes, this.jwt);
+        return new module.default(this, this.router, this.routes, this.jwt);
     }
 
     public handleInternalPath = (): void => {
@@ -335,7 +313,7 @@ export class UIHandler {
 
         let anchor: HTMLAnchorElement = this.getAnchorForUri(uri);
         if (anchor) {            
-            utils.processElementsClass(this.document, '.navLinks a', 'active');
+            utils.processElementsClass(document, '.navLinks a', 'active');
             anchor.classList.add('active');
         };
     }
@@ -410,13 +388,13 @@ export class UIHandler {
         if (id && (id != '/') && (id != '/home')) {
             uri += id;
         }
-        let a: HTMLAnchorElement = this.document.querySelector('a[href="' + uri + '"]');
+        let a: HTMLAnchorElement = document.querySelector('a[href="' + uri + '"]');
         if (a) {
             console.log('[HOST] activate element after page change: ', a);
             return a;
         }
         uri = uri + id;
-        a = this.document.querySelector('a[href="' + uri + '"]');
+        a = document.querySelector('a[href="' + uri + '"]');
         if (a) {
             console.log('[HOST] activate element after page change: ', a);
             return a;
@@ -425,7 +403,7 @@ export class UIHandler {
     }
 
     handleTextMessage(text: string) {
-        let messageEl = this.getMessageEl();
+        let messageEl = this.el.getMessageEl();
         messageEl.innerHTML = text;
         this.showElement('message');
         this.messageTimeout = setTimeout(this.hideMessage, 4000);
@@ -434,7 +412,7 @@ export class UIHandler {
     handleFrameLoaded(origin: string, id: string): string {
         let uri = this.getUriOfOrigin(origin, id);
         let anchor: HTMLAnchorElement = this.getAnchorForUri(uri, id);
-        utils.processElementsClass(this.document, '.navLinks a', 'active');
+        utils.processElementsClass(document, '.navLinks a', 'active');
         if (anchor) {
             anchor.classList.add('active');
             this.target = anchor;
@@ -454,14 +432,14 @@ export class UIHandler {
         this.initContact(that);
         this.initPostMessage(that);
 
-        /*
-        console.log('[HOST] ', this.getAllowedSources());
-        console.log('[HOST] ', this.getActiveMicrofrontendUrl());
-        console.log('[HOST] ', this.getAllowedRoutes());
-        let url = this.getIFrameSrc();
-        console.log('[HOST] ', this.getAllowedRoutes([url]));
-        */
-
+        console.groupCollapsed('[HOST Initial config:')
+        console.groupCollapsed('[HOST Allowed Sources:')
+        console.table(this.getAllowedSources());
+        console.groupEnd();
+        console.groupCollapsed('[HOST Allowed Routes:')
+        console.table(this.getAllowedRoutes());
+        console.groupEnd();
+        console.groupEnd();
 
         // Hide loading and content element
         this.start();

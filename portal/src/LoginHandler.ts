@@ -7,7 +7,7 @@ import { JwtService, User } from './auth/JWTService';
 
 
 export default class LoginHandler extends ModuleHandler{
-    constructor(uiHandler: UIHandler, router: Router, document: Document, routes: Routes, private jwt: JwtService) {
+    constructor(uiHandler: UIHandler, router: Router, routes: Routes, private jwt: JwtService) {
         super(uiHandler, router, routes, 'login');
     }
 
