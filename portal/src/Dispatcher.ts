@@ -1,5 +1,6 @@
 import { host }  from "./rimless";
-import UIHandler from "./UIHandler";
+import { Mediator } from "./Mediator";
+import * as t from './Topics';
 
 
 interface IFrameLoaded {
@@ -11,7 +12,21 @@ interface IFrameLoaded {
 export class Dispatcher {
     private connection: any = null;
     private payload: any = {};
-    constructor(private uiHandler: UIHandler) {
+    private accessToken: Promise<string>;
+    private allowedNavigations: Promise<string[]>;
+    constructor(private mediator: Mediator) {
+        this.initSubscribers();
+    }
+
+    initSubscribers() {
+
+        this.mediator.subscribe(t.REQUEST_ACCESS_TOKEN_TOPIC, (context: any, message: any) => {
+            console.warn('[HOST] received message %s', t.REQUEST_ACCESS_TOKEN_TOPIC, context, message);
+        })
+
+        this.mediator.subscribe(t.REQUEST_ALLOWED_NAVIGATIONS_TOPIC, (context: any, message: any) => {
+            console.warn('[HOST] received message %s', t.REQUEST_ALLOWED_NAVIGATIONS_TOPIC, context, message);
+        })
 
     }
 
@@ -19,7 +34,26 @@ export class Dispatcher {
         this.connection = await host.connect(iframe, {
             log: (...values: any[]) => console.log('[HOST]', ...values),
             frameLoaded: (sender: string, notification: string, origin: string, id: string): IFrameLoaded => {
-                let accessToken = this.uiHandler.handleFrameLoaded(sender, id);
+                this.mediator.publish(t.REQUEST_ACCESS_TOKEN_TOPIC, [sender, id]).then((message: any) => {
+                    console.warn('[HOST] %s received', t.REQUEST_ACCESS_TOKEN_TOPIC, message);
+                }, (rejected: any) => {
+                    console.error('[HOST] %s rejected', t.REQUEST_ACCESS_TOKEN_TOPIC, rejected);
+                });
+
+                this.mediator.publish(t.REQUEST_ALLOWED_NAVIGATIONS_TOPIC, {}).then((message: any) => {
+                    console.warn('[HOST] %s received', t.REQUEST_ACCESS_TOKEN_TOPIC, message);
+                }, (rejected: any) => {
+                    console.error('[HOST] %s rejected', t.REQUEST_ALLOWED_NAVIGATIONS_TOPIC, rejected);
+                });
+                
+                return {                    
+                    allowedNavigations: [],
+                    payload: ''
+                };
+
+                
+                //let accessToken = this.uiHandler.handleFrameLoaded(sender, id);
+                /*
                 if (accessToken) 
                     return {                    
                         allowedNavigations: this.uiHandler.getAllowedNavigations(),
@@ -31,10 +65,11 @@ export class Dispatcher {
                         allowedNavigations: this.uiHandler.getAllowedNavigations(),
                         payload: this.payload
                     };
+                */
             },
             navigate: (url: string, payload?: any) => {
                 this.payload = payload || {};
-                this.uiHandler.navigate(url);
+                //this.uiHandler.navigate(url);
             },
             textMessage: (sender: string, notification: string, text: string) => this.handleTextMessage(sender, notification, text)
         });
@@ -42,7 +77,7 @@ export class Dispatcher {
 
     public handleTextMessage(sender: string, notification: string, text: string) {
         console.log(`[HOST] [${text}]`);
-        this.uiHandler.handleTextMessage(text);
+        //this.uiHandler.handleTextMessage(text);
     }
 
     public async disconnect() {

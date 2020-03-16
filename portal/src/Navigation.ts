@@ -2,9 +2,10 @@ import { Routes, Target } from "./Routes";
 import { Router } from './Router';
 import { UIHandler } from './UIHandler';
 import { AuthGuard } from './auth/AuthGuard';
+import { Dispatcher } from './Dispatcher';
 
 export class Navigation {
-    constructor (private router: Router, public routes: Routes, private uiHandler: UIHandler, private auth: AuthGuard) {        
+    constructor (private dispatcher: Dispatcher, private router: Router, public routes: Routes, private uiHandler: UIHandler, private auth: AuthGuard) {        
         this.uiHandler = uiHandler;        
         console.groupCollapsed('[HOST] Routes:');
         let log: any[] = [];

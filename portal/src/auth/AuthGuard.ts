@@ -1,10 +1,11 @@
 import { JwtService } from './JWTService';
 import { Router, CanActivate } from '../Router';
 import { Routes } from '../Routes';
+import { Dispatcher } from '../Dispatcher';
 
 
 export class AuthGuard implements CanActivate {
-  constructor(public auth: JwtService, public router: Router, private routes: Routes) {}
+  constructor(private dispatcher: Dispatcher, public auth: JwtService, public router: Router, private routes: Routes) {}
 
   isProtected(path: string): boolean {
     if (!path.startsWith('/')) 

@@ -2,18 +2,58 @@
  * based on code in: https://github.com/mehdishojaei/mediator
 */
 
+import * as utils from './Utils';
+
 //const one = new Promise<string>((resolve, reject) => {});
 
 export class Mediator {
-
+    
     private mediator: Object = {};
     private cache: any = {};
-
+    
     constructor() {}
-
+    
     private isArray(obj: Object) {
         return Object.prototype.toString.call(obj) === '[object Array]';
     }
+    
+    prepareResponse(message: any, response: any) {
+        response.$request = message;
+        return response;
+    }
+
+    async request(topic: string, message: any, context?: any): Promise<any> {
+        let promise = new Promise(async (resolve, reject) => {
+            let id = utils.makeid(8);
+            let rsvpChannelId = utils.makeid(5);
+            let responseChannel = `response.${topic}-${rsvpChannelId}`;
+            message.$rsvpChannel = responseChannel;
+            message.$id = id;
+            let result;
+            console.groupCollapsed(`[HOST] request to ${message.$id}`);
+
+            let callback = (context: any, message: any) => {
+                console.log(`[HOST] response to ${message.$request.$id} using ${message.$request.$rsvpChannel}`, message);
+                result = message;
+            }
+
+            this.subscribe(responseChannel, callback);
+            try {
+                await this.publish(`request.${topic}`, message);
+                console.log(`[HOST] response to request.${topic} received`);
+                console.groupEnd();                
+                resolve(result);
+            } catch (error) {
+                console.error(`[HOST] response to request.${topic} not received`);            
+                console.groupEnd();
+                reject(new Error(`[HOST] response to request.${topic} not received`));
+            } finally {
+                this.unsubscribe(responseChannel, callback);
+            }
+        });
+        return promise;
+    }
+    
 
     // Returns a promise of all the promises returned from subscribers callbacks.
     // If a promise fails, the result promise will not be reject and continue waiting
@@ -50,11 +90,9 @@ export class Mediator {
     
                 for (var i = 0, len = subscribers.length; i < len; i++) {
                     let subscriber = subscribers[i];
-                    if (!hash['channel']) {
-                        hash['channel'] = channel;
-                    } else {
-                        hash['_channel'] = channel;
-                    }
+                    if (!hash['$channel']) {
+                        hash['$channel'] = channel;
+                    } 
                     let result = subscriber.callback(subscriber.context || that, hash);
         
                     if (!result) {

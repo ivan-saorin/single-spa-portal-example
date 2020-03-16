@@ -5,6 +5,9 @@ import { Navigation } from './Navigation';
 import { UIHandler } from './UIHandler';
 import { AuthGuard } from './auth/AuthGuard';
 import { JwtService } from './auth/JWTService';
+import { Mediator } from './Mediator';
+import { Dispatcher } from './Dispatcher';
+import * as utils from './Utils';
 
 const routes: Routes = {    
     "/": {
@@ -75,34 +78,36 @@ let baseUrl = 'http://localhost:3200';
 let jwt = new JwtService(baseUrl);
 
 // History mode do not support loading the app throug the direct change of the url in the navigation bar of the browser. Let's use Hash mode instead.
+let mediator = new Mediator();
+let dispatcher = new Dispatcher(mediator);
 let router = new Router(RouterMode.Hash);
-let auth = new AuthGuard(jwt, router, routes);
-let uiHandler = new UIHandler(router, routes, jwt, auth);
-new Navigation(router, routes, uiHandler, auth);
+let auth = new AuthGuard(dispatcher, jwt, router, routes);
+let uiHandler = new UIHandler(dispatcher, router, routes, jwt, auth);
+new Navigation(dispatcher, router, routes, uiHandler, auth);
 uiHandler.init();
 
-/*
-let mediator = new Mediator();
-
-mediator.subscribe('test.topic', (context: any, message: any) => {
-    console.warn('[HOST] test.topic', message);
-})
-
-mediator.publish('test.topic', {test: 'toast'}).then((message: any) => {
-    console.warn('[HOST] 1 test.topic received', message);
-}, (rejected: any) => {
-    console.warn('[HOST] 1 test.topic rejected', rejected);
+mediator.subscribe('request.my-personal-topic', async (context: any, message: any) => {
+    console.log('[HOST] received request for request.my-personal-topic', message);    
+    let response = mediator.prepareResponse(message, {'this': `is the response at message Id [${message.$id}]`});
+    try {
+        await mediator.publish(message.$rsvpChannel, response);
+        console.log('[HOST] response to response.my-personal-topic sent');
+    } catch (error) {
+        console.error('[HOST] response to response.my-personal-topic not sent');
+    }      
 });
 
-mediator.publish('test.topic', {test: 'toast'}).then((message: any) => {
-    console.warn('[HOST] 2 test.topic received', message);
-}, (rejected: any) => {
-    console.warn('[HOST] 2 test.topic rejected', rejected);
-});
-
-mediator.publish('test.topic2', {test: 'should not receive'}).then((message: any) => {
-    console.warn('[HOST] test.topic2 received', message);
-}, (rejected: any) => {
-    console.warn('[HOST] test.topic2 rejected', rejected);
-});
-*/
+(async () => {
+    try {
+        let response = await mediator.request('my-personal-topic', {'message': 'in a bottle'});
+        console.info('received response 1', response);
+    } catch(error) {
+        console.error(error);
+    }
+    try {
+        let response2 = await mediator.request('my-specific-topic', {'message': 'in a bottle'});
+        console.info('received response 2', response2);
+    } catch(error) {
+        console.error(error);
+    }
+})();

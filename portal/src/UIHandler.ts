@@ -1,8 +1,9 @@
-import * as utils from './utils';
+import * as utils from './Utils';
 import { Router, RouterMode } from './Router';
 import { Routes } from './Routes';
 import * as url from 'url';
 import { Dispatcher } from './Dispatcher';
+import * as t from './Topics';
 import { ModuleHandler } from './moduleHandler';
 import { JwtService } from './auth/JWTService';
 import { AuthGuard } from './auth/AuthGuard';
@@ -13,15 +14,13 @@ export class UIHandler {
     private errorTimeout: NodeJS.Timeout;
     private messageTimeout: NodeJS.Timeout;
     private target: HTMLElement;
-    private host: Dispatcher;
     private activeModule: ModuleHandler = null;
     private wereHeadingTo: string = null;
     private el: Elements;
 
-    constructor(private router: Router, private routes: Routes, private jwt: JwtService, private guard: AuthGuard) {
+    constructor(private dispatcher: Dispatcher, private router: Router, private routes: Routes, private jwt: JwtService, private guard: AuthGuard) {
         this.el = new Elements();
         this.router = router;
-        this.host = new Dispatcher(this);
     }
 
     private microFrontendByRoute(path: string): string {
@@ -161,7 +160,7 @@ export class UIHandler {
 
         let activeMicrofronteEnd = this.getActiveMicrofrontendUrl();
         let m = "Hello World! (" + utils.makeid(6) + ")";
-        this.host.sendMessage({
+        this.dispatcher.sendMessage({
             "sender": this.getOrigin(),
             "recipient": activeMicrofronteEnd,
             "text": m
@@ -169,11 +168,11 @@ export class UIHandler {
     }
 
     public async postMessage(message: any) {
-        if (!this.host.isConnected()) {
+        if (!this.dispatcher.isConnected()) {
             let iframe = this.el.getIFrameEl();
-            await this.host.connect(iframe);
+            await this.dispatcher.connect(iframe);
         }
-        await this.host.sendMessage(message);
+        await this.dispatcher.sendMessage(message);
     }
 
     public handleClick = (event: any): void => {
@@ -222,12 +221,12 @@ export class UIHandler {
 
         this.load();
         iframe.src = this.microFrontendByRoute(path);
-        if (this.host.isConnected()) {
-            this.host.disconnect();
+        if (this.dispatcher.isConnected()) {
+            this.dispatcher.disconnect();
         }
-        if (!this.host.isConnected()) {
+        if (!this.dispatcher.isConnected()) {
             let iframe = this.el.getIFrameEl();
-            this.host.connect(iframe);
+            this.dispatcher.connect(iframe);
         }
         // => URL changed to /foo/bar
     }
@@ -439,6 +438,8 @@ export class UIHandler {
         console.table(this.getAllowedRoutes());
         console.groupEnd();
         console.groupEnd();
+
+        
 
         // Hide loading and content element
         this.start();
