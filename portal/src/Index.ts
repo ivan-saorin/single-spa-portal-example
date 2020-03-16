@@ -6,7 +6,7 @@ import { UIHandler } from './UIHandler';
 import { AuthGuard } from './auth/AuthGuard';
 import { JwtService } from './auth/JWTService';
 import { Mediator } from './Mediator';
-import { Dispatcher } from './Dispatcher';
+import { GuestsHandler } from './GuestsHandler';
 import * as utils from './Utils';
 
 const routes: Routes = {    
@@ -75,39 +75,21 @@ const routes: Routes = {
 };
 
 let baseUrl = 'http://localhost:3200';
-let jwt = new JwtService(baseUrl);
 
 // History mode do not support loading the app throug the direct change of the url in the navigation bar of the browser. Let's use Hash mode instead.
 let mediator = new Mediator();
-let dispatcher = new Dispatcher(mediator);
-let router = new Router(RouterMode.Hash);
-let auth = new AuthGuard(dispatcher, jwt, router, routes);
-let uiHandler = new UIHandler(dispatcher, router, routes, jwt, auth);
-new Navigation(dispatcher, router, routes, uiHandler, auth);
+let jwt = new JwtService(mediator, baseUrl);
+let guests = new GuestsHandler(mediator);
+let router = new Router(mediator, RouterMode.Hash);
+let auth = new AuthGuard(mediator, jwt, router, routes);
+let uiHandler = new UIHandler(mediator, routes, auth);
+let navigation = new Navigation(mediator, router, routes, uiHandler, auth);
 uiHandler.init();
 
-mediator.subscribe('request.my-personal-topic', async (context: any, message: any) => {
-    console.log('[HOST] received request for request.my-personal-topic', message);    
-    let response = mediator.prepareResponse(message, {'this': `is the response at message Id [${message.$id}]`});
-    try {
-        await mediator.publish(message.$rsvpChannel, response);
-        console.log('[HOST] response to response.my-personal-topic sent');
-    } catch (error) {
-        console.error('[HOST] response to response.my-personal-topic not sent');
-    }      
-});
-
-(async () => {
-    try {
-        let response = await mediator.request('my-personal-topic', {'message': 'in a bottle'});
-        console.info('received response 1', response);
-    } catch(error) {
-        console.error(error);
-    }
-    try {
-        let response2 = await mediator.request('my-specific-topic', {'message': 'in a bottle'});
-        console.info('received response 2', response2);
-    } catch(error) {
-        console.error(error);
-    }
+/*
+(async () => {    
+    await navigation.navigate('/contacts');
+    console.log('path:', await navigation.path());
 })();
+*/
+

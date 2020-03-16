@@ -2,8 +2,8 @@ import * as utils from './Utils';
 import { Router, RouterMode } from './Router';
 import { Routes } from './Routes';
 import * as url from 'url';
-import { Dispatcher } from './Dispatcher';
-import * as t from './Topics';
+import { Mediator } from './Mediator';
+import * as topics from './Mediator';
 import { ModuleHandler } from './moduleHandler';
 import { JwtService } from './auth/JWTService';
 import { AuthGuard } from './auth/AuthGuard';
@@ -18,9 +18,42 @@ export class UIHandler {
     private wereHeadingTo: string = null;
     private el: Elements;
 
-    constructor(private dispatcher: Dispatcher, private router: Router, private routes: Routes, private jwt: JwtService, private guard: AuthGuard) {
+    constructor(private mediator: Mediator, private routes: Routes, /*private jwt: JwtService, */private guard: AuthGuard) {
         this.el = new Elements();
-        this.router = router;
+
+        this.initSubscribers();
+	}
+
+	initSubscribers() {
+		this.mediator.handle(topics.COMMAND_FRAME_LOADED, async (message: any) => {
+            console.assert((message), 'message MUST be defined');            
+            console.assert((message.origin), 'message MUST contains the field "origin"');
+            console.assert((message.id), 'message MUST contains the field "id"');
+            console.log(`${topics.COMMAND_FRAME_LOADED} id [${message.$id}]`, message);
+                        
+            let accessToken = await this.handleFrameLoaded(message.origin, message.id);
+            return {
+                allowedNavigations: this.getAllowedNavigations(),
+                accessToken: accessToken
+            };
+        });
+
+		this.mediator.handle(topics.COMMAND_TEXT_MESSAGE, async (message: any) => {
+            console.assert((message), 'message MUST be defined');            
+            console.assert((message.text), 'message MUST contains the field "text"');
+            console.log(`${topics.COMMAND_TEXT_MESSAGE} id [${message.$id}]`, message);
+                        
+            this.handleTextMessage(message.text);
+            return {};
+        });
+
+        this.mediator.handle(topics.COMMAND_COMPLETE_PREV_NAVIGATION, async (message: any) => {
+            console.assert((message), 'message MUST be defined');            
+            console.log(`${topics.COMMAND_COMPLETE_PREV_NAVIGATION} id [${message.$id}]`, message);
+                        
+            this.completePreviousNavigation();
+            return {};
+        });
     }
 
     private microFrontendByRoute(path: string): string {
@@ -150,7 +183,7 @@ export class UIHandler {
         console.error('[HOST] Error loading content.');
     }
 
-    public handlePostMessageClick = (event: any): void => {
+    public handlePostMessageClick = async (event: any) => {
 
         // Don't follow the link
         event.preventDefault();
@@ -160,19 +193,16 @@ export class UIHandler {
 
         let activeMicrofronteEnd = this.getActiveMicrofrontendUrl();
         let m = "Hello World! (" + utils.makeid(6) + ")";
-        this.dispatcher.sendMessage({
-            "sender": this.getOrigin(),
-            "recipient": activeMicrofronteEnd,
-            "text": m
-        });
-    }
 
-    public async postMessage(message: any) {
-        if (!this.dispatcher.isConnected()) {
-            let iframe = this.el.getIFrameEl();
-            await this.dispatcher.connect(iframe);
+        try {
+            await this.mediator.request(topics.COMMAND_SEND_MESSAGE, {
+                "sender": this.getOrigin(),
+                "recipient": activeMicrofronteEnd,
+                "text": m
+            });
+        } catch(error) {
+            console.error(error);
         }
-        await this.dispatcher.sendMessage(message);
     }
 
     public handleClick = (event: any): void => {
@@ -192,22 +222,32 @@ export class UIHandler {
         this.navigate(path);
     }
 
-    public completePreviousNavigation() {
-        if (this.wereHeadingTo)
-            this.router.navigate(this.wereHeadingTo);
+    public async completePreviousNavigation() {
+        this.navigate(this.wereHeadingTo);
     }
 
-    public handleExternalPath = (): void => {
-        let path = this.router ? this.router.getCurrentPath() : "";
-        if (this.guard && this.guard.isProtected(path)) {
-            this.wereHeadingTo = path;
+    private async path() {
+        let path;
+        try {
+            path = await this.mediator.request(topics.COMMAND_CURRENT_PATH, {});
+        } catch(error) {
+            console.error(error);
+            path = "";
+        }
+        return path;
+    }
+
+    public handleExternalPath = async () => {
+        let path = await this.path();
+        if (this.guard && this.guard.isProtected(path.currentPath)) {
+            this.wereHeadingTo = path.currentPath;
             if (!this.guard.canActivate()) {
-                console.log('[HOST] Denied change Location to %s path: %s', 'external', path);        
+                console.log('[HOST] Denied change Location to %s path: %s', 'external', path.currentPath);        
                 return;
             }
         }        
 
-        console.log('[HOST] Location changed to %s path: %s', 'external', path);        
+        console.log('[HOST] Location changed to %s path: %s', 'external', path.currentPath);        
 
         const iframe = <HTMLIFrameElement> document.getElementById('mfc');
         iframe.frameBorder = '0';
@@ -220,15 +260,22 @@ export class UIHandler {
         }
 
         this.load();
-        iframe.src = this.microFrontendByRoute(path);
-        if (this.dispatcher.isConnected()) {
-            this.dispatcher.disconnect();
+        iframe.src = this.microFrontendByRoute(path.currentPath);
+
+        try {
+            let response1 = await this.mediator.request(topics.COMMAND_IS_CONNECTED_TO_GUEST, {});
+            if (response1.isConnected) {
+                let iframe = this.el.getIFrameEl();
+                await this.mediator.request(topics.COMMAND_DISCONNECT_FROM_GUEST, {});
+            }
+
+            let response2 = await this.mediator.request(topics.COMMAND_IS_CONNECTED_TO_GUEST, {});
+            if (!response2.isConnected) {
+                await this.mediator.request(topics.COMMAND_CONNECT_TO_GUEST, {iframe: this.el.getIFrameEl()});
+            }
+        } catch(error) {
+            console.error(error);
         }
-        if (!this.dispatcher.isConnected()) {
-            let iframe = this.el.getIFrameEl();
-            this.dispatcher.connect(iframe);
-        }
-        // => URL changed to /foo/bar
     }
 
     private switchClassElement(name: string, ...classes: string[]) {
@@ -276,16 +323,15 @@ export class UIHandler {
         }
         console.log('[HOST] moduleFactory creating module [%s] with handler [%s]', selector, handlerName);
         let module = await import('./LoginHandler'); 
-        return new module.default(this, this.router, this.routes, this.jwt);
+        return new module.default(this.mediator, this.routes);
     }
 
-    public handleInternalPath = (): void => {
-        
-        let path = this.router ? this.router.getCurrentPath() : "";
-        if (this.guard && this.guard.isProtected(path)) {
-            this.wereHeadingTo = path;
+    public handleInternalPath = async () => {
+        let path = await this.path();
+        if (this.guard && this.guard.isProtected(path.currentPath)) {
+            this.wereHeadingTo = path.currentPath;
             if (!this.guard.canActivate()) {
-                console.log('[HOST] Denied change Location to %s path: %s', 'internal', path);        
+                console.log('[HOST] Denied change Location to %s path: %s', 'internal', path.currentPath);        
                 return;
             }
         }        
@@ -294,10 +340,10 @@ export class UIHandler {
             this.activeModule.unmount();
         }
 
-        console.log('[HOST] Location changed to %s path: %s', 'internal', path);
+        console.log('[HOST] Location changed to %s path: %s', 'internal', path.currentPath);
 
         this.hidePages('portal-page');
-        let uri = path.substring(1);
+        let uri = path.currentPath.substring(1);
 
         this.moduleFactory(uri).then((module: ModuleHandler) => {
             this.activeModule = module;
@@ -317,10 +363,10 @@ export class UIHandler {
         }
     }
 
-    public handleRedirectPath = (): void => {
-        let path = this.router ? this.router.getCurrentPath() : "";
-        console.log('[HOST] URL changed to redirect path: %s', path);
-        this.router.navigate(this.microFrontendByRoute(path));
+    public handleRedirectPath = async ()=> {
+        let path = await this.path();
+        console.log('[HOST] URL changed to redirect path: %s', path.currentPath);
+        this.navigate(this.microFrontendByRoute(path.currentPath));
     }
 
     private initNavLinks(uiHandler: UIHandler) {
@@ -408,7 +454,7 @@ export class UIHandler {
         this.messageTimeout = setTimeout(this.hideMessage, 4000);
     }
 
-    handleFrameLoaded(origin: string, id: string): string {
+    async handleFrameLoaded(origin: string, id: string): Promise<string> {
         let uri = this.getUriOfOrigin(origin, id);
         let anchor: HTMLAnchorElement = this.getAnchorForUri(uri, id);
         utils.processElementsClass(document, '.navLinks a', 'active');
@@ -416,10 +462,16 @@ export class UIHandler {
             anchor.classList.add('active');
             this.target = anchor;
         }
-        if (this.guard.isProtected(uri)) {
-            return this.jwt.accessToken;
-        }
-        else {
+        try {
+            if (this.guard.isProtected(uri)) {
+                let response = await this.mediator.request(topics.COMMAND_ACCESS_TOKEN, {});                
+                return response.accessToken;
+            }
+            else {
+                return null;
+            }
+        } catch(error) {
+            console.error(error);
             return null;
         }
     }
@@ -446,9 +498,15 @@ export class UIHandler {
     }
 
 
-    public navigate(this: UIHandler, path: string) {
+    public async navigate(this: UIHandler, path: string) {
         console.log('[HOST] want to navigate to:', path);
-        this.router.navigate(path);
+        if (path) {
+            try {
+                await this.mediator.request(topics.COMMAND_NAVIGATE, {url: path});
+            } catch(error) {
+                console.error(error);
+            }    
+        }
     }
 
 }

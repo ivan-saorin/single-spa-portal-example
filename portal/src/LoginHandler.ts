@@ -1,14 +1,13 @@
-import * as utils from './utils';
-import { Router } from './Router';
 import { Routes } from './Routes';
-import { UIHandler } from './UIHandler';
 import { ModuleHandler } from './ModuleHandler';
-import { JwtService, User } from './auth/JWTService';
+import { Mediator } from './Mediator';
+import * as topics from './Mediator';
+import { User } from './auth/AuthModels'
 
 
-export default class LoginHandler extends ModuleHandler{
-    constructor(uiHandler: UIHandler, router: Router, routes: Routes, private jwt: JwtService) {
-        super(uiHandler, router, routes, 'login');
+export default class LoginHandler extends ModuleHandler {
+    constructor(mediator: Mediator, routes: Routes) {
+        super(mediator, routes, 'login');
     }
 
     protected attachEvents(): void {
@@ -21,7 +20,7 @@ export default class LoginHandler extends ModuleHandler{
         button.removeEventListener('click', this.clickHandler);
     }
 
-    private submit() {
+    private async submit() {
         console.log('[HOST] login form submit');
         let userEl = document.getElementById('user') as HTMLInputElement;
         let passwordEl = document.getElementById('password') as HTMLInputElement;
@@ -31,14 +30,16 @@ export default class LoginHandler extends ModuleHandler{
             password: passwordEl.value
         }
 
-        this.jwt.login(userInfo).then(() => {
+        try {
+            await this.mediator.request(topics.COMMAND_LOGIN, userInfo);
             userEl.value = '';
             passwordEl.value = '';
-            this.uiHandler.completePreviousNavigation();    
-        }, (rejection) => {
+            await this.mediator.request(topics.COMMAND_COMPLETE_PREV_NAVIGATION, {});
+        } catch(error) {
+            console.error(error);
             userEl.value = '';
             passwordEl.value = '';
-        });
+        }        
     }
 
     private clickHandler = (event: any) =>  {

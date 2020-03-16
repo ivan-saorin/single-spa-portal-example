@@ -1,5 +1,8 @@
 // https://github.com/s22h/router.ts
 
+import { Mediator } from './Mediator';
+import * as topics from './Mediator';
+
 export interface CanActivate {
 	canActivate(): boolean;
 }
@@ -31,7 +34,7 @@ export class Router extends EventTarget {
 	lastPath = "";
 	mode: RouterMode;
 
-	constructor(mode: RouterMode = RouterMode.History, options: RouterOptions = new RouterOptions()) {
+	constructor(private mediator: Mediator, mode: RouterMode = RouterMode.History, options: RouterOptions = new RouterOptions()) {
 		super();
 		
 		this.options = options;
@@ -43,6 +46,25 @@ export class Router extends EventTarget {
 		} else if (this.mode == RouterMode.Hash) {
 			window.addEventListener("hashchange", (_: Event) => this.run());
 		}
+
+		this.initSubscribers();
+	}
+
+	initSubscribers() {
+		this.mediator.handle(topics.COMMAND_NAVIGATE, async (message: any) => {
+			console.assert((message), 'message MUST be defined');
+			console.assert((message.url), 'message MUST contains the field "url"');
+			console.assert((message.url.length > 0), 'the field "url" cannot be empty');
+			console.log(`${topics.COMMAND_NAVIGATE} id [${message.$id}] url[${message.url}]`);
+			this.navigate(message.url);
+            return {};
+		});
+
+		this.mediator.handle(topics.COMMAND_CURRENT_PATH, async (message: any) => {
+			console.log(`${topics.COMMAND_CURRENT_PATH} id [${message.$id}] url[${message.url}]`);
+			return {currentPath: this.getCurrentPath()}
+		});
+		
 	}
 
 	add(path: string, callback: CallableFunction): void {

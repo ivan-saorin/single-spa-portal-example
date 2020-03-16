@@ -2,10 +2,11 @@ import { Routes, Target } from "./Routes";
 import { Router } from './Router';
 import { UIHandler } from './UIHandler';
 import { AuthGuard } from './auth/AuthGuard';
-import { Dispatcher } from './Dispatcher';
+import { Mediator } from './Mediator';
+import * as topics from './Mediator';
 
 export class Navigation {
-    constructor (private dispatcher: Dispatcher, private router: Router, public routes: Routes, private uiHandler: UIHandler, private auth: AuthGuard) {        
+    constructor (private mediator: Mediator, private router: Router, public routes: Routes, private uiHandler: UIHandler, private auth: AuthGuard) {        
         this.uiHandler = uiHandler;        
         console.groupCollapsed('[HOST] Routes:');
         let log: any[] = [];
@@ -42,12 +43,20 @@ export class Navigation {
         }
     }
 
-    navigate(path: string): void {
-        this.router.navigate(path);
+    async navigate(path: string) {
+        try {
+            await this.mediator.request(topics.COMMAND_NAVIGATE, {url: path});
+        } catch(error) {
+            console.error(error);
+        }
     }
 
-    path(): string {
-        return this.router.getCurrentPath();
+    async path(): Promise<any> {
+        try {
+            return await this.mediator.request(topics.COMMAND_CURRENT_PATH, {});
+        } catch(error) {
+            console.error(error);
+        }
     }
 
 }

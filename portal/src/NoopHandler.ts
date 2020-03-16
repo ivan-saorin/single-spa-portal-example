@@ -1,13 +1,11 @@
-import * as utils from './utils';
-import { Router } from './Router';
 import { Routes } from './Routes';
-import { UIHandler } from './UIHandler';
 import { ModuleHandler } from './ModuleHandler';
+import { Mediator } from './Mediator';
 
 
 export default class LoginHandler extends ModuleHandler{
-    constructor(uiHandler: UIHandler, router: Router, document: Document, routes: Routes) {
-        super(uiHandler, router, routes, 'undefined');
+    constructor(mediator: Mediator, routes: Routes) {
+        super(mediator, routes, 'undefined');
     }
 
     protected attachEvents(): void {

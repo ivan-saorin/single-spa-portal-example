@@ -1,5 +1,8 @@
 import Axios from 'axios';
 import { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
+import { Mediator } from '../Mediator';
+import * as topics from '../Mediator';
+import { User } from './AuthModels'
 
 export interface HttpBinData {
     url: string;
@@ -8,12 +11,7 @@ export interface HttpBinData {
     args?: any
 }
 
-export interface User {
-    user: string;
-    password: string;
-}
-
-export interface AccessToken {
+interface AccessToken {
     access_token: string;
 }
 
@@ -21,7 +19,7 @@ export class JwtService {
     private axios: AxiosInstance;
     private _accessToken: string = null;
 
-    constructor(private baseUrl: string) {
+    constructor(private mediator: Mediator, private baseUrl: string) {
         const config: AxiosRequestConfig = {
             baseURL: this.baseUrl + '/auth',
             headers: {
@@ -30,6 +28,26 @@ export class JwtService {
             }
         };
         this.axios = Axios.create(config);
+        this.initSubscribers();
+	}
+
+	initSubscribers() {
+		this.mediator.handle(topics.COMMAND_ACCESS_TOKEN, async (message: any) => {
+			console.assert((message), 'message MUST be defined');
+			console.log(`${topics.COMMAND_ACCESS_TOKEN} id [${message.$id}] message[${message}]`);
+			
+            return {accessToken: this.accessToken};
+        });
+
+		this.mediator.handle(topics.COMMAND_LOGIN, async (message: any) => {
+            console.assert((message), 'message MUST be defined');
+            console.assert((message.user), 'message.user MUST be defined');
+            console.assert((message.password), 'message.password MUST be defined');
+			console.log(`${topics.COMMAND_ACCESS_TOKEN} id [${message.$id}] message[${message}]`);
+            await this.login(message);
+            return {};
+        });
+
     }
 
     public isAuthenticated(): boolean {
@@ -63,7 +81,7 @@ export class JwtService {
                 const axiosError = err as AxiosError
                 console.error('[HOST] ', axiosError);
             }
-
+            this._accessToken = null;
             throw err;
         }
     }

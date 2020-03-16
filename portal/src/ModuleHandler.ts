@@ -1,10 +1,9 @@
-import { Router } from './Router';
 import { Routes } from './Routes';
-import { UIHandler } from './UIHandler';
+import { Mediator } from './Mediator';
 
 export abstract class ModuleHandler {
 
-    constructor(protected uiHandler: UIHandler, protected router: Router, protected routes: Routes, protected selector: string) {
+    constructor(protected mediator: Mediator, protected routes: Routes, protected selector: string) {
         
     }
 

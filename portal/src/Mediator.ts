@@ -6,6 +6,21 @@ import * as utils from './Utils';
 
 //const one = new Promise<string>((resolve, reject) => {});
 
+export type Handler = (message: any) => Promise<any>;
+
+export const COMMAND_NAVIGATE = 'router.navigate';
+export const COMMAND_CURRENT_PATH = 'router.current.path'
+export const COMMAND_PAGE_LOADED = 'ui.pageLoaded';
+export const COMMAND_SEND_MESSAGE = 'guests.handler.send.message';
+export const COMMAND_IS_CONNECTED_TO_GUEST = 'guests.handler.is.connected';
+export const COMMAND_CONNECT_TO_GUEST = 'guests.handler.connect';
+export const COMMAND_DISCONNECT_FROM_GUEST = 'guests.handler.disconnect';
+export const COMMAND_FRAME_LOADED = 'ui.frame.loaded';
+export const COMMAND_TEXT_MESSAGE = 'ui.text.message';
+export const COMMAND_ACCESS_TOKEN = 'jwt.access.token';
+export const COMMAND_LOGIN = 'jwt.login';
+export const COMMAND_COMPLETE_PREV_NAVIGATION = 'ui.complete.previous.navigation';
+
 export class Mediator {
     
     private mediator: Object = {};
@@ -22,6 +37,21 @@ export class Mediator {
         return response;
     }
 
+    async handle(topic: string, handler: Handler) {
+        this.subscribe(`request.${topic}`, async (context: any, message: any) => {
+            try {
+                console.log(`[HOST] received request for ${message.$channel}`, message);
+                let r = await handler(message);
+                let response = this.prepareResponse(message, r);
+                await this.publish(message.$rsvpChannel, response);
+                console.log(`[HOST] response to ${message.$rsvpChannel} sent`);
+            } catch (error) {
+                console.error(`[HOST] response to ${message.$rsvpChannel} sent`);
+            }      
+        });
+    }
+
+
     async request(topic: string, message: any, context?: any): Promise<any> {
         let promise = new Promise(async (resolve, reject) => {
             let id = utils.makeid(8);
@@ -30,7 +60,7 @@ export class Mediator {
             message.$rsvpChannel = responseChannel;
             message.$id = id;
             let result;
-            console.groupCollapsed(`[HOST] request to ${message.$id}`);
+            console.groupCollapsed(`[HOST] request to [${topic}] id [${message.$id}]`);
 
             let callback = (context: any, message: any) => {
                 console.log(`[HOST] response to ${message.$request.$id} using ${message.$request.$rsvpChannel}`, message);
