@@ -4,7 +4,7 @@ import { Mediator } from './Mediator';
 import * as topics from './Mediator';
 
 export interface CanActivate {
-	canActivate(): boolean;
+	canActivate(): Promise<boolean>;
 }
   
 

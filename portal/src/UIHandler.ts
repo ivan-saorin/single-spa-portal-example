@@ -1,11 +1,8 @@
 import * as utils from './Utils';
-import { Router, RouterMode } from './Router';
 import { Routes } from './Routes';
-import * as url from 'url';
 import { Mediator } from './Mediator';
 import * as topics from './Mediator';
 import { ModuleHandler } from './moduleHandler';
-import { JwtService } from './auth/JWTService';
 import { AuthGuard } from './auth/AuthGuard';
 import { Elements } from './Elements'
 
@@ -19,7 +16,7 @@ export class UIHandler {
     private el: Elements;
 
     constructor(private mediator: Mediator, private routes: Routes, /*private jwt: JwtService, */private guard: AuthGuard) {
-        this.el = new Elements();
+        this.el = new Elements(routes);
 
         this.initSubscribers();
 	}
@@ -33,7 +30,7 @@ export class UIHandler {
                         
             let accessToken = await this.handleFrameLoaded(message.origin, message.id);
             return {
-                allowedNavigations: this.getAllowedNavigations(),
+                allowedNavigations: this.el.getAllowedNavigations(),
                 accessToken: accessToken
             };
         });
@@ -70,64 +67,6 @@ export class UIHandler {
         return '';
     }
 
-    private getAllowedRoutes(exclude?: string[]): string[] {
-        if (exclude) {
-            for (let i = 0; i < exclude.length; i++) {
-                if (exclude[i].endsWith('/')) {
-                    exclude[i] = exclude[i].substring(0, exclude[i].length - 1);
-                }
-            }
-        }
-        var routes: string[] = [];
-        for (const key in this.routes) {
-            //console.log('[HOST] key: ', key, routes[key]);
-            if (this.routes[key].external && this.routes[key].external.url) {
-                if (exclude && exclude.length > 0) {
-                    let url = this.routes[key].external.url;
-                    if (url.endsWith('/')) {
-                        url = url.substring(0, url.length - 1);
-                    }
-
-                    if (exclude.indexOf(url) == -1) {
-                        routes.push(key);
-                    }
-                }
-                else {
-                    routes.push(key);
-                }
-            }
-        }
-        return routes;
-    }
-
-    public getAllowedNavigations(): string[] {
-        let url = this.getIFrameSrc();
-        return this.getAllowedRoutes([url]);
-    }
-
-    private getBasePath() {
-        let basePathEl = this.el.getBasePathEl();
-        return basePathEl ? basePathEl.href : "";
-    }
-
-    private getOrigin() {
-        let basePath = this.getBasePath();
-        let origin = basePath.substring(0, basePath.length - 1);
-        console.log('[HOST] origin: ', origin);
-        return origin;
-    }
-
-    private getIFrameSrc() {
-        let iFrame = this.el.getIFrameEl();
-        return iFrame.src;
-    }
-
-    private getActiveMicrofrontendUrl() {
-        let src = this.getIFrameSrc();
-        var p = url.parse(src);
-        return p.protocol + '//' + p.host;
-    }
-
     private getAllowedSources(): string[] {
         var allowedSources: string[] = [];
         for (const key in this.routes) {
@@ -140,45 +79,27 @@ export class UIHandler {
     }
 
     private start() {
-        let loadingEl = this.el.getLoadingEl();
-        utils.removeClass(loadingEl, 'show');
-        utils.addClass(loadingEl, 'hide');
-
-        let errorEl = this.el.getErrorEl();
-        utils.removeClass(errorEl, 'show');
-        utils.addClass(errorEl, 'hide');
-
-        let contentEl = this.el.getContentEl();
-        utils.removeClass(contentEl, 'show');
-        utils.addClass(contentEl, 'hide');
+        this.el.hideLoading();
+        this.el.hideError();
+        this.el.hideContent();
     }
 
     private load() {
-        this.hidePages("portal-page");
-        let loadingEl = this.el.getLoadingEl();
-        utils.removeClass(loadingEl, 'hide');
-        utils.addClass(loadingEl, 'show');
+        this.el.hidePages("portal-page");
+        this.el.showLoading();
     }
 
     private loaded = () => {
-        let loadingEl = this.el.getLoadingEl();
-        utils.removeClass(loadingEl, 'show');
-        utils.addClass(loadingEl, 'hide');
-        let contentEl = this.el.getContentEl();
-        utils.removeClass(contentEl, 'hide');
-        utils.addClass(contentEl, 'show');
+        this.el.hideLoading();
+        this.el.showContent();
         clearTimeout(this.errorTimeout);
     }
 
     public loadingError = () => {
-        let loadingEl = this.el.getLoadingEl();
-        utils.removeClass(loadingEl, 'show');
-        utils.addClass(loadingEl, 'hide');
-
+        this.el.hideLoading();
         let errorEl = this.el.getErrorEl();
         errorEl.innerHTML = 'Error loading content.';
-        utils.removeClass(errorEl, 'hide');
-        utils.addClass(errorEl, 'show');
+        this.el.showError();
         clearTimeout(this.errorTimeout);
         console.error('[HOST] Error loading content.');
     }
@@ -191,12 +112,12 @@ export class UIHandler {
         // Log the clicked element in the console
         console.log('[HOST] ', event.target);
 
-        let activeMicrofronteEnd = this.getActiveMicrofrontendUrl();
+        let activeMicrofronteEnd = this.el.getActiveMicrofrontendUrl();
         let m = "Hello World! (" + utils.makeid(6) + ")";
 
         try {
             await this.mediator.request(topics.COMMAND_SEND_MESSAGE, {
-                "sender": this.getOrigin(),
+                "sender": this.el.getOrigin(),
                 "recipient": activeMicrofronteEnd,
                 "text": m
             });
@@ -218,12 +139,12 @@ export class UIHandler {
 
         let href = event.target.href ? event.target.href : event.target.parentNode.href;
 
-        let path = utils.removeStart(href, this.getBasePath());
+        let path = utils.removeStart(href, this.el.getBasePath());
         this.navigate(path);
     }
 
     public async completePreviousNavigation() {
-        this.navigate(this.wereHeadingTo);
+        await this.navigate(this.wereHeadingTo);
     }
 
     private async path() {
@@ -241,7 +162,7 @@ export class UIHandler {
         let path = await this.path();
         if (this.guard && this.guard.isProtected(path.currentPath)) {
             this.wereHeadingTo = path.currentPath;
-            if (!this.guard.canActivate()) {
+            if (! await this.guard.canActivate()) {
                 console.log('[HOST] Denied change Location to %s path: %s', 'external', path.currentPath);        
                 return;
             }
@@ -278,37 +199,8 @@ export class UIHandler {
         }
     }
 
-    private switchClassElement(name: string, ...classes: string[]) {
-        if (!name)
-            throw new Error('"name" actual parameter must be defined');
-        if (!classes)
-            throw new Error('"classes" actual parameter must be defined');
-        if ((classes.length < 2) || (classes.length > 2))
-            throw new Error('"classes" actual parameter must be an array of length 2');
-        let element = document.getElementsByTagName(name.toUpperCase())[0];
-        utils.removeClass(element, classes[0]);
-        utils.addClass(element, classes[1]);
-    }
-
-    private showElement(name: string) {
-        this.switchClassElement(name, 'hide', 'show');
-    }
-
-    private hideElement(name: string) {
-        this.switchClassElement(name, 'show', 'hide');
-    }
-
     private hideMessage = () => {
-        this.hideElement('message');
-    }
-
-    private hidePages(clazz: string) {
-        utils.processElementsClass2(document, clazz, 'show', 'hide');
-        let contentEl = this.el.getContentEl();
-        utils.removeClass(contentEl, 'show');
-        utils.addClass(contentEl, 'hide');
-        utils.removeClass(contentEl, 'show');
-        utils.addClass(contentEl, 'hide');
+        this.el.hideElement('message');
     }
 
     public async moduleFactory(selector: string): Promise<ModuleHandler> {
@@ -330,7 +222,7 @@ export class UIHandler {
         let path = await this.path();
         if (this.guard && this.guard.isProtected(path.currentPath)) {
             this.wereHeadingTo = path.currentPath;
-            if (!this.guard.canActivate()) {
+            if (! await this.guard.canActivate()) {
                 console.log('[HOST] Denied change Location to %s path: %s', 'internal', path.currentPath);        
                 return;
             }
@@ -342,7 +234,7 @@ export class UIHandler {
 
         console.log('[HOST] Location changed to %s path: %s', 'internal', path.currentPath);
 
-        this.hidePages('portal-page');
+        this.el.hidePages('portal-page');
         let uri = path.currentPath.substring(1);
 
         this.moduleFactory(uri).then((module: ModuleHandler) => {
@@ -350,7 +242,7 @@ export class UIHandler {
             if (this.activeModule) {
                 this.activeModule.mount();
             }
-            this.showElement(uri);
+            this.el.showElement(uri);
         }, 
         (reason: any) => {
             console.error('[HOST] Error loading module: ', reason);
@@ -450,7 +342,7 @@ export class UIHandler {
     handleTextMessage(text: string) {
         let messageEl = this.el.getMessageEl();
         messageEl.innerHTML = text;
-        this.showElement('message');
+        this.el.showElement('message');
         this.messageTimeout = setTimeout(this.hideMessage, 4000);
     }
 
@@ -487,11 +379,9 @@ export class UIHandler {
         console.table(this.getAllowedSources());
         console.groupEnd();
         console.groupCollapsed('[HOST] Allowed Routes:')
-        console.table(this.getAllowedRoutes());
+        console.table(this.el.getAllowedRoutes());
         console.groupEnd();
         console.groupEnd();
-
-        
 
         // Hide loading and content element
         this.start();
