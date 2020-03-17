@@ -81,9 +81,9 @@ let mediator = new Mediator();
 let jwt = new JwtService(mediator, baseUrl);
 let guests = new GuestsHandler(mediator);
 let router = new Router(mediator, RouterMode.Hash);
-let auth = new AuthGuard(mediator, jwt, routes);
+let auth = new AuthGuard(mediator, routes, jwt);
 let uiHandler = new UIHandler(mediator, routes, auth);
-let navigation = new Navigation(mediator, router, routes, uiHandler, auth);
+let navigation = new Navigation(mediator, routes, router, uiHandler);
 uiHandler.init();
 
 /*

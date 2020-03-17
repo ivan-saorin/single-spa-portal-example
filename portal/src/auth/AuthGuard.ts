@@ -6,7 +6,7 @@ import * as topics from '../Mediator';
 
 
 export class AuthGuard implements CanActivate {
-  constructor(private mediator: Mediator, public auth: JwtService, private routes: Routes) {}
+  constructor(private mediator: Mediator, private routes: Routes, public auth: JwtService) {}
 
   isProtected(path: string): boolean {
     if (!path.startsWith('/')) 

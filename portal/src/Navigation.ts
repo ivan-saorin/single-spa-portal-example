@@ -6,7 +6,7 @@ import { Mediator } from './Mediator';
 import * as topics from './Mediator';
 
 export class Navigation {
-    constructor (private mediator: Mediator, private router: Router, public routes: Routes, private uiHandler: UIHandler, private auth: AuthGuard) {        
+    constructor (private mediator: Mediator, public routes: Routes, private router: Router, private uiHandler: UIHandler) {        
         this.uiHandler = uiHandler;        
         console.groupCollapsed('[HOST] Routes:');
         let log: any[] = [];

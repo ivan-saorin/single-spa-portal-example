@@ -15,7 +15,7 @@ export class UIHandler {
     private wereHeadingTo: string = null;
     private el: Elements;
 
-    constructor(private mediator: Mediator, private routes: Routes, /*private jwt: JwtService, */private guard: AuthGuard) {
+    constructor(private mediator: Mediator, private routes: Routes, private guard: AuthGuard) {
         this.el = new Elements(routes);
 
         this.initSubscribers();
@@ -204,17 +204,16 @@ export class UIHandler {
     }
 
     public async moduleFactory(selector: string): Promise<ModuleHandler> {
-        let handlerName: string;
+        let module;
         switch (selector) {
             case 'home':
             case 'contact':
-            case 'protected': handlerName = './NoopHandler'; break;
-            case 'login': handlerName = './LoginHandler'; break;
+            case 'protected': module = await import('./NoopHandler'); break;
+            case 'login': module = await import('./LoginHandler'); break;
 
             default: throw Error(`Unknown value as selector: [${selector}].`);
         }
-        console.log('[HOST] moduleFactory creating module [%s] with handler [%s]', selector, handlerName);
-        let module = await import('./LoginHandler'); 
+        console.log('[HOST] moduleFactory creating module [%s] with handler [%s]', selector);
         return new module.default(this.mediator, this.routes);
     }
 
@@ -237,22 +236,22 @@ export class UIHandler {
         this.el.hidePages('portal-page');
         let uri = path.currentPath.substring(1);
 
-        this.moduleFactory(uri).then((module: ModuleHandler) => {
-            this.activeModule = module;
+        try {
+            this.activeModule = await this.moduleFactory(uri); 
             if (this.activeModule) {
                 this.activeModule.mount();
             }
             this.el.showElement(uri);
-        }, 
-        (reason: any) => {
-            console.error('[HOST] Error loading module: ', reason);
-        });
+        } catch (e) {    
+            console.error('[HOST] Error loading module: ', e);
+        }
 
         let anchor: HTMLAnchorElement = this.getAnchorForUri(uri);
         if (anchor) {            
             utils.processElementsClass(document, '.navLinks a', 'active');
             anchor.classList.add('active');
         }
+        this.start();
     }
 
     public handleRedirectPath = async ()=> {
@@ -261,45 +260,37 @@ export class UIHandler {
         this.navigate(this.microFrontendByRoute(path.currentPath));
     }
 
+    public async navigate(this: UIHandler, path: string) {
+        console.log('[HOST] want to navigate to:', path);
+        if (path) {
+            try {
+                await this.mediator.request(topics.COMMAND_NAVIGATE, {url: path});
+            } catch(error) {
+                console.error(error);
+            }    
+        }
+    }
+
     private initNavLinks(uiHandler: UIHandler) {
-        // Attach handleClicks to all A elements in the navigation
-        let links = document.getElementsByClassName('navLinks');
-        //console.log('[HOST] links', links);
-        Array.prototype.filter.call(links, function (ul: any) {
-            //console.log('[HOST] ', ul.nodeName);
-            let lis = ul.getElementsByTagName('LI');
-            Array.prototype.filter.call(lis, function (li: any) {
-                //console.log('[HOST] ', li.nodeName);
-                let as = li.getElementsByTagName('A');
-                Array.prototype.filter.call(as, function (a: any) {
-                    // Ensure to register click event lietner only once
-                    a.removeEventListener("click", uiHandler.handleClick, false);
-                    a.addEventListener('click', uiHandler.handleClick, false);
-                });
-            });
+        let anchors = document.querySelectorAll('.navLinks li a');
+        Array.prototype.filter.call(anchors, function (a: any) {
+            // Ensure to register click event lietner only once
+            a.removeEventListener("click", uiHandler.handleClick, false);
+            a.addEventListener('click', uiHandler.handleClick, false);
         });
     }
 
     private initContact(uiHandler: UIHandler) {
-        // Attach handleClicks to Contact A element
-        let ctaLinks = document.getElementsByClassName('cta');
-        Array.prototype.filter.call(ctaLinks, function (cta: any) {
-            //console.log('[HOST] ', cta.nodeName);
-            // Ensure to register click event lietner only once
-            cta.removeEventListener("click", uiHandler.handleClick, false);
-            cta.addEventListener('click', uiHandler.handleClick, false);
-        });
+        let anchor = document.querySelector('.cta');
+        anchor.removeEventListener("click", uiHandler.handleClick, false);
+        anchor.addEventListener('click', uiHandler.handleClick, false);
     }
 
     private initPostMessage(uiHandler: UIHandler) {
         // Attach handleClicks to Post Message A element
-        let postMsgLinks = document.getElementsByClassName('postmsg');
-        Array.prototype.filter.call(postMsgLinks, function (postMsg: any) {
-            //console.log('[HOST] ', postMsg.nodeName);
-            // Ensure to register click event lietner only once
-            postMsg.removeEventListener("click", uiHandler.handlePostMessageClick, false);
-            postMsg.addEventListener('click', uiHandler.handlePostMessageClick, false);
-        });
+        let postMsg = document.querySelector('.postmsg');
+        postMsg.removeEventListener("click", uiHandler.handlePostMessageClick, false);
+        postMsg.addEventListener('click', uiHandler.handlePostMessageClick, false);
     }
 
     getUriOfOrigin(origin: string, pathName: string) {
@@ -307,9 +298,7 @@ export class UIHandler {
             origin = origin + '/';
         }
         for (const key in this.routes) {
-            //console.log('[HOST] key: ', key, this.routes[key]);
             if (this.routes[key].external && (origin == this.routes[key].external.url)) {
-                //console.log('[HOST] FOUND: ', key);
                 return key;
             }
         }
@@ -385,18 +374,6 @@ export class UIHandler {
 
         // Hide loading and content element
         this.start();
-    }
-
-
-    public async navigate(this: UIHandler, path: string) {
-        console.log('[HOST] want to navigate to:', path);
-        if (path) {
-            try {
-                await this.mediator.request(topics.COMMAND_NAVIGATE, {url: path});
-            } catch(error) {
-                console.error(error);
-            }    
-        }
     }
 
 }
